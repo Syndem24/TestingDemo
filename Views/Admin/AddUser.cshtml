@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Add User";
+}
+
+<div class="admin-container">
+    <h2>User Management</h2>
+
+    @if (ViewBag.Error != null)
+    {
+        <p class="error-message">@ViewBag.Error</p>
+    }
+    @if (ViewBag.Success != null)
+    {
+        <p class="success-message">@ViewBag.Success</p>
+    }
+
+    <form method="post">
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter user email" required />
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter user password" required />
+        </div>
+
+        <!-- Show Password Checkbox (Fixed Alignment) -->
+        <div class="checkbox-group">
+            <input type="checkbox" id="showPassword" onclick="togglePassword()">
+            <label for="showPassword"> Show Password</label>
+        </div>
+
+        <div class="input-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="Admin">Admin</option>
+                <option value="Accountant">Accountant</option>
+                <option value="User">User</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn-submit">Add User</button>
+            <a href="@Url.Action("Users", "Admin")" class="btn-view">View Users</a>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript: Show/Hide Password -->
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        passwordField.type = passwordField.type === "password" ? "text" : "password";
+    }
+</script>
+
+<!-- CSS -->
+<style>
+    .admin-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    /* Fixed Show Password Alignment */
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+        .checkbox-group input {
+            width: auto;
+            margin: 0;
+        }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .btn-submit, .btn-view {
+        flex: 1;
+        padding: 12px;
+        margin: 5px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 5px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-submit {
+        background: #007BFF;
+        color: white;
+        border: none;
+    }
+
+        .btn-submit:hover {
+            background: #0056b3;
+        }
+
+    .btn-view {
+        background: #28a745;
+        color: white;
+        border: none;
+    }
+
+        .btn-view:hover {
+            background: #218838;
+        }
+</style>

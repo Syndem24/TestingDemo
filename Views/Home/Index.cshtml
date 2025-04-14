@@ -1,0 +1,132 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <!-- Go to Task Flow Button -->
+    <a href="@Url.Action("TaskFlow", "Task")" class="btn btn-primary">
+        <i class="bi bi-arrow-left-circle"></i> Go to Task Flow
+    </a>
+
+    <!-- Edit Task Button (Initially Disabled) -->
+    <a id="editTaskButton" href="#" class="btn btn-warning disabled">
+        <i class="bi bi-pencil-square"></i> Edit Task
+    </a>
+</div>
+
+
+<!-- ✅ Priority Legend -->
+<div class="container">
+    <h2 class="text-center"><i class="bi bi-kanban"></i> Task Overview</h2>
+    <div class="d-flex justify-content-center gap-3 my-3">
+        <span class="badge bg-success">Normal</span>
+        <span class="badge bg-warning text-dark">Slightly Important</span>
+        <span class="badge bg-danger">Urgent</span>
+    </div>
+
+    <!-- ✅ Sorting Dropdown -->
+    <div class="d-flex justify-content-end mb-3">
+        <label class="me-2">Sort by Priority:</label>
+        <select id="sortPriority" class="form-select w-auto" onchange="sortTable()">
+            <option value="">All</option>
+            <option value="Normal">Normal</option>
+            <option value="Slightly Important">Slightly Important</option>
+            <option value="Urgent">Urgent</option>
+        </select>
+    </div>
+
+    <!-- ✅ Task Table -->
+    <div class="table-responsive">
+        <table id="taskTable" class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Client Name</th>
+                    <th>Permit</th>
+                    <th>Requirements</th>
+                    <th>Priority</th>
+                    <th>Progress</th>
+                    <th>Date Issued</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in ViewBag.Tasks)
+                {
+                    <tr class="task-row @GetPriorityClass(task.Priority)" data-task-id="@task.Id">
+                        <td>@task.ClientName</td>
+                        <td>@task.Permit</td>
+                        <td>@task.Requirements</td>
+                        <td class="task-priority">@task.Priority</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: @task.Progress%;" aria-valuenow="@task.Progress" aria-valuemin="0" aria-valuemax="100">
+                                    @task.Progress%
+                                </div>
+                            </div>
+                        </td>
+                        <td>@task.DateIssued.ToString("MMMM dd, yyyy HH:mm:ss")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ✅ Sorting & Secondary Screen Detection Script -->
+<script>
+    function checkForSecondaryScreen() {
+        if (window.screen.availWidth > window.screen.width || window.screen.availHeight > window.screen.height) {
+            let newWin = window.open("/", "SecondaryScreen", "width=1920,height=1080");
+            if (newWin) {
+                newWin.moveTo(window.screen.availWidth - newWin.outerWidth, 0);
+                newWin.focus();
+            }
+        } else {
+            alert("No secondary screen detected. The homepage will be displayed on the primary screen.");
+        }
+    }
+    window.onload = checkForSecondaryScreen;
+
+    function sortTable() {
+        let selectedPriority = document.getElementById("sortPriority").value.toLowerCase();
+        let table = document.getElementById("taskTable");
+        let rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            let priorityCell = rows[i].getElementsByClassName("task-priority")[0];
+            if (priorityCell) {
+                let priorityText = priorityCell.innerText.toLowerCase();
+                rows[i].style.display = (selectedPriority === "" || priorityText === selectedPriority) ? "" : "none";
+            }
+        }
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let tasks = document.querySelectorAll(".task-row"); // Select all task rows
+        let editTaskButton = document.getElementById("editTaskButton");
+
+        if (tasks.length > 0) {
+            let firstTaskId = tasks[0].getAttribute("data-task-id"); // Get the first task ID
+            editTaskButton.href = "/Task/EditTask/" + firstTaskId;
+            editTaskButton.classList.remove("disabled"); // Enable the button
+        } else {
+            editTaskButton.onclick = function () {
+                alert("No tasks available to edit.");
+                return false;
+            };
+        }
+    });
+</script>
+
+@functions {
+    public string GetPriorityClass(string priority)
+    {
+        return priority switch
+        {
+            "Normal" => "table-success",
+            "Slightly Important" => "table-warning",
+            "Urgent" => "table-danger",
+            _ => ""
+        };
+    }
+}

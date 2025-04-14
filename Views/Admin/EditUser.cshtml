@@ -1,0 +1,127 @@
+﻿@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="edit-container">
+    <h2>Edit User</h2>
+
+    <form method="post">
+        <input type="hidden" name="email" value="@Model.Email" />
+
+        <div class="input-group">
+            <label for="newEmail">New Email:</label>
+            <input type="email" id="newEmail" name="newEmail" value="@Model.Email" required />
+        </div>
+
+        <div class="input-group">
+            <label for="password">New Password (Leave blank to keep current):</label>
+            <input type="password" id="password" name="password" placeholder="Enter new password" />
+        </div>
+
+        <!-- Show Password Checkbox -->
+        <div class="checkbox-group">
+            <input type="checkbox" id="showPassword" onclick="togglePassword()">
+            <label for="showPassword"> Show Password</label>
+        </div>
+
+        <div class="input-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                @foreach (var role in ViewBag.Roles)
+                {
+                    <option value="@role.Text" selected="@(role.Text == Model.Email)">@role.Text</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn-submit">Save Changes</button>
+        <a href="@Url.Action("Users", "Admin")" class="btn-back">Cancel</a>
+    </form>
+</div>
+
+<!-- JavaScript: Show/Hide Password -->
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        passwordField.type = passwordField.type === "password" ? "text" : "password";
+    }
+</script>
+
+<!-- CSS -->
+<style>
+    .edit-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    /* Show Password Checkbox */
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: #007BFF;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .btn-submit:hover {
+            background: #0056b3;
+        }
+
+    .btn-back {
+        display: block;
+        margin-top: 15px;
+        padding: 10px;
+        background: #dc3545;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+        .btn-back:hover {
+            background: #c82333;
+        }
+</style>
+

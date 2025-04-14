@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Task Flow Management";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center">Task Flow Management</h2>
+
+    <!-- Archive Button -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="@Url.Action("Archive", "Task")" class="btn btn-secondary">
+            <i class="bi bi-archive"></i> View Archive
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Left Side: Task Table (Expanded) -->
+        <div class="col-md-9">
+            <div class="card shadow-lg p-3">
+                <h4 class="text-center">Task List</h4>
+
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Permit</th>
+                            <th>Requirements</th>
+                            <th>Progress</th>
+                            <th>Priority</th>
+                            <th>Date Issued</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.Tasks.Count > 0)
+                        {
+                            @foreach (var task in ViewBag.Tasks)
+                            {
+                                <tr class="@GetPriorityClass(task.Priority)">
+                                    <td>@task.ClientName</td>
+                                    <td>@task.Permit</td>
+                                    <td>@task.Requirements</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" style="width: @task.Progress%;" aria-valuenow="@task.Progress" aria-valuemin="0" aria-valuemax="100">
+                                                @task.Progress%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@task.Priority</td>
+                                    <td>@task.DateIssued.ToString("MMMM dd, yyyy")</td>
+                                    <td>
+                                        <a href="@Url.Action("EditTask", "Task", new { id = task.Id })" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a href="@Url.Action("DeleteTask", "Task", new { id = task.Id })" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this task?')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                        <a href="#" class="btn btn-success btn-sm" onclick="confirmDone(@task.Id)">
+                                            <i class="bi bi-check-circle"></i> Done
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No tasks available.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Side: Add Task Form (Sticky) -->
+        <div class="col-md-3">
+            <div class="card shadow-lg p-3 sticky-form">
+                <h4 class="text-center">Add New Task</h4>
+                <form method="post" asp-action="AddTask" asp-controller="Task">
+                    <div class="mb-3">
+                        <label class="form-label">Client Name:</label>
+                        <input type="text" name="ClientName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Permit:</label>
+                        <input type="text" name="Permit" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Requirements:</label>
+                        <input type="text" name="Requirements" class="form-control" placeholder="Enter requirements separated by commas" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Priority:</label>
+                        <select name="Priority" class="form-select" required>
+                            <option value="Normal">Normal</option>
+                            <option value="Slightly Important">Slightly Important</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Add Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Razor Helper Function for Priority Colors -->
+@functions {
+    public string GetPriorityClass(string priority)
+    {
+        return priority switch
+        {
+            "Normal" => "table-success",
+            "Slightly Important" => "table-warning",
+            "Urgent" => "table-danger",
+            _ => ""
+        };
+    }
+}
+
+<script>
+    function confirmDone(taskId) {
+        if (confirm("Are you sure this task is completed? It will be moved to the archive.")) {
+            window.location.href = "/Task/MarkAsDone/" + taskId;
+        }
+    }
+</script>
+
+<style>
+    /* Sticky Add Task Form */
+    .sticky-form {
+        position: sticky;
+        top: 10px;
+    }
+</style>
+

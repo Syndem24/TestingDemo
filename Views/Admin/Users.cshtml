@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Users List";
+}
+
+<div class="users-container">
+    <h2>Users List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in ViewBag.Users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@string.Join(", ", user.Roles)</td>
+                    <td>
+                        <a href="@Url.Action("EditUser", "Admin", new { email = user.Email })" class="btn-edit">Edit</a>
+                        <a href="#" class="btn-delete" onclick="confirmDelete('@user.Email')">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="@Url.Action("AddUser", "Admin")" class="btn-back">Back to Add User</a>
+</div>
+
+<!-- JavaScript: Confirm Delete -->
+<script>
+    function confirmDelete(email) {
+        if (confirm("Are you sure you want to delete this user?")) {
+            window.location.href = "/Admin/DeleteUser?email=" + encodeURIComponent(email);
+        }
+    }
+</script>
+
+<!-- CSS -->
+<style>
+    .users-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background: #007BFF;
+        color: white;
+    }
+
+    .btn-edit, .btn-delete {
+        padding: 8px 12px;
+        font-size: 14px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-right: 5px;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        color: white;
+    }
+
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+    .btn-back {
+        display: block;
+        margin-top: 15px;
+        padding: 10px;
+        background: #007BFF;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+        .btn-back:hover {
+            background: #0056b3;
+        }
+</style>
