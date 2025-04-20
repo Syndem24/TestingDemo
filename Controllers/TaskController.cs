@@ -23,28 +23,30 @@ public class TaskController : BaseController
 
     public IActionResult AddTask()
     {
-        return View();
+        return View(new AddTaskViewModel());
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddTask(string clientName, string permit, string requirements, int progress, string priority)
+    public async Task<IActionResult> AddTask(AddTaskViewModel model)
     {
-        if (!string.IsNullOrWhiteSpace(clientName) && !string.IsNullOrWhiteSpace(permit))
+        if (!ModelState.IsValid)
         {
-            var newTask = new TaskFlowModel
-            {
-                ClientName = clientName,
-                Permit = permit,
-                Requirements = requirements,
-                Progress = progress,
-                Priority = priority,
-                DateIssued = DateTime.Now,
-                IsDone = false
-            };
-
-            _context.Tasks.Add(newTask);
-            await _context.SaveChangesAsync();
+            return View(model);
         }
+
+        var newTask = new TaskFlowModel
+        {
+            ClientName = model.ClientName,
+            Permit = model.Permit,
+            Requirements = string.Join(",", model.Requirements ?? new List<string>()),
+            Progress = 0,
+            Priority = model.Priority,
+            DateIssued = DateTime.Now,
+            IsDone = false
+        };
+
+        _context.Tasks.Add(newTask);
+        await _context.SaveChangesAsync();
 
         return RedirectToAction("TaskFlow");
     }

@@ -1,0 +1,91 @@
+﻿@model AddTaskViewModel
+
+@{
+    ViewData["Title"] = "Add New Task";
+}
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Add New Task</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 text-center">Task Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="AddTask" asp-controller="Task" id="addTaskForm">
+                        <div class="mb-3">
+                            <label asp-for="ClientName" class="form-label"></label>
+                            <input asp-for="ClientName" class="form-control" />
+                            <span asp-validation-for="ClientName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Permit" class="form-label"></label>
+                            <input asp-for="Permit" class="form-control" />
+                            <span asp-validation-for="Permit" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Requirements</label>
+                            <p class="text-muted">Add each requirement and check it to include it.</p>
+
+                            <div id="requirementsList" class="border p-3 rounded bg-light"></div>
+
+                            <div class="input-group mt-2">
+                                <input type="text" id="newRequirement" class="form-control" placeholder="Enter new requirement" />
+                                <button type="button" class="btn btn-success" onclick="addRequirement()">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Priority" class="form-label"></label>
+                            <select asp-for="Priority" class="form-select">
+                                <option value="">Select Priority</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Slightly Important">Slightly Important</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                            <span asp-validation-for="Priority" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Add Task</button>
+                        <a asp-action="TaskFlow" class="btn btn-secondary">Back to Task List</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function addRequirement() {
+            var input = $('#newRequirement');
+            var text = input.val().trim();
+            if (text !== "") {
+                var idSafe = text.replace(/\s+/g, "_").replace(/[^\w]/g, '');
+                var html = `
+                            <div class="d-flex align-items-center mb-2">
+                                <input type="checkbox" class="form-check-input me-2" name="Requirements" value="${text}" id="req_${idSafe}" checked />
+                                <label class="form-check-label flex-grow-1" for="req_${idSafe}">${text}</label>
+                            </div>
+                        `;
+                $('#requirementsList').append(html);
+                input.val('');
+            }
+        }
+
+        $(document).ready(function () {
+            $('#newRequirement').on('keypress', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    addRequirement();
+                }
+            });
+        });
+    </script>
+}
