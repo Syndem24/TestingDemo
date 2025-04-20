@@ -14,7 +14,6 @@
     </a>
 </div>
 
-
 <!-- ✅ Priority Legend -->
 <div class="container">
     <h2 class="text-center"><i class="bi bi-kanban"></i> Task Overview</h2>
@@ -26,7 +25,7 @@
 
     <!-- ✅ Sorting Dropdown -->
     <div class="d-flex justify-content-end mb-3">
-        <label class="me-2">Sort by Priority:</label>
+        <label class="me-2" for="sortPriority">Sort by Priority:</label>
         <select id="sortPriority" class="form-select w-auto" onchange="sortTable()">
             <option value="">All</option>
             <option value="Normal">Normal</option>
@@ -37,33 +36,69 @@
 
     <!-- ✅ Task Table -->
     <div class="table-responsive">
-        <table id="taskTable" class="table table-bordered table-striped">
+        <table id="taskTable" class="table table-bordered table-striped" aria-describedby="taskTableDesc">
+            <caption id="taskTableDesc" class="visually-hidden">List of client tasks with details and actions</caption>
             <thead class="table-dark">
                 <tr>
-                    <th>Client Name</th>
-                    <th>Permit</th>
-                    <th>Requirements</th>
-                    <th>Priority</th>
-                    <th>Progress</th>
-                    <th>Date Issued</th>
+                    <th scope="col">Client Name</th>
+                    <th scope="col">Permit</th>
+                    <th scope="col">Requirements</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Progress</th>
+                    <th scope="col">Date Issued</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var task in ViewBag.Tasks)
+                @if (ViewBag.Tasks != null && ViewBag.Tasks.Count > 0)
                 {
-                    <tr class="task-row @GetPriorityClass(task.Priority)" data-task-id="@task.Id">
-                        <td>@task.ClientName</td>
-                        <td>@task.Permit</td>
-                        <td>@task.Requirements</td>
-                        <td class="task-priority">@task.Priority</td>
-                        <td>
-                            <div class="progress">
-                                <div class="progress-bar bg-info" style="width: @task.Progress%;" aria-valuenow="@task.Progress" aria-valuemin="0" aria-valuemax="100">
-                                    @task.Progress%
+                    foreach (var task in ViewBag.Tasks)
+                    {
+                        var progress = (int)task.Progress;
+                        var isZeroProgress = progress == 0;
+                        var progressBarClass = isZeroProgress ? "bg-secondary" : "bg-info";
+                        var progressLabel = isZeroProgress ? "No Progress" : $"{progress}%";
+
+                        <tr class="task-row @GetPriorityClass(task.Priority)" data-task-id="@task.Id">
+                            <td>@task.ClientName</td>
+                            <td>@task.Permit</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(task.Requirements))
+                                {
+                                    var reqs = task.Requirements.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                    <ul class="mb-0 ps-3">
+                                        @foreach (var req in reqs)
+                                        {
+                                            <li>@req.Trim()</li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">None</span>
+                                }
+                            </td>
+                            <td class="task-priority text-uppercase fw-semibold">@task.Priority</td>
+                            <td>
+                                <div class="d-flex flex-column align-items-start" style="min-width: 140px;">
+                                    <div class="progress w-100" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" title="@progressLabel" style="height: 24px;">
+                                        <div class="progress-bar @progressBarClass d-flex align-items-center justify-content-center" style="width: @progress%;">
+                                            <span class="fw-semibold text-white small">@progressLabel</span>
+                                        </div>
+                                    </div>
+                                    @if (isZeroProgress)
+                                    {
+                                        <small class="text-muted mt-1">No progress yet</small>
+                                    }
                                 </div>
-                            </div>
-                        </td>
-                        <td>@task.DateIssued.ToString("MMMM dd, yyyy HH:mm:ss")</td>
+                            </td>
+                            <td>@task.DateIssued.ToString("MMMM dd, yyyy HH:mm:ss")</td>                           
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No tasks available.</td>
                     </tr>
                 }
             </tbody>

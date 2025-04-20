@@ -5,47 +5,69 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Configure authentication
+// Configure application cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+// Add MVC
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Apply migrations automatically and seed admin user
+// ===== Auto Migrate and Seed Roles & Admin User =====
 using (var scope = app.Services.CreateScope())
 {
-    var scopedServices = scope.ServiceProvider;
-    var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
     context.Database.Migrate();
 
-    // Ensure admin user is created
-    await CreateAdminUserAsync(scopedServices);
+    await CreateRoles(services);
+    await CreateAdminUserAsync(services);
 }
+
+// ===== Middleware Pipeline =====
+app.UseStaticFiles();
+app.UseRouting();
+
+// ✅ Cache Prevention Middleware — must be before authentication
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+        context.Response.Headers["Pragma"] = "no-cache";
+        context.Response.Headers["Expires"] = "0";
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles();
+
 app.MapControllers();
 app.MapDefaultControllerRoute();
 
 app.Run();
+
+// ===== Helper Methods =====
 async Task CreateRoles(IServiceProvider serviceProvider)
 {
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
     string[] roleNames = { "Admin", "Accountant", "User" };
+
     foreach (var roleName in roleNames)
     {
         if (!await roleManager.RoleExistsAsync(roleName))
@@ -55,11 +77,6 @@ async Task CreateRoles(IServiceProvider serviceProvider)
     }
 }
 
-using (var scope = app.Services.CreateScope())
-{
-    await CreateRoles(scope.ServiceProvider);
-}
-// Function to create admin user
 async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
 {
     using var scope = serviceProvider.CreateScope();
@@ -71,13 +88,16 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
         var roleManager = scopedServices.GetRequiredService<RoleManager<IdentityRole>>();
 
         string adminRole = "Admin";
+        string adminEmail = "admin@cpcpa.com";
+        string adminPassword = "Admin@123";
+
         if (!await roleManager.RoleExistsAsync(adminRole))
         {
             await roleManager.CreateAsync(new IdentityRole(adminRole));
         }
 
-        string adminEmail = "admin@cpcpa.com";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
         if (adminUser == null)
         {
             var newAdmin = new ApplicationUser
@@ -87,7 +107,6 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
                 EmailConfirmed = true
             };
 
-            string adminPassword = "Admin@123";
             var result = await userManager.CreateAsync(newAdmin, adminPassword);
 
             if (result.Succeeded)
@@ -97,7 +116,8 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
             }
             else
             {
-                Console.WriteLine("❌ Failed to create admin user: " + string.Join(", ", result.Errors));
+                Console.WriteLine("❌ Failed to create admin user: " +
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
     }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class TaskController : Controller
+public class TaskController : BaseController   
 {
     private readonly ApplicationDbContext _context;
 
@@ -115,24 +115,23 @@ public class TaskController : Controller
         return View(model);
     }
 
-    // POST: Save Edited Task
     [HttpPost]
     public async Task<IActionResult> EditTask(TaskFlowModel model)
     {
-        Console.WriteLine($"Progress received: {model.Progress}"); // Add this
-        Console.WriteLine($"ModelState IsValid: {ModelState.IsValid}"); // Add this
+        Console.WriteLine($"Progress received: {model.Progress}");
+        Console.WriteLine($"Requirements: {model.Requirements}");
+        Console.WriteLine($"DoneRequirements: {model.DoneRequirements}");
+        Console.WriteLine($"ModelState IsValid: {ModelState.IsValid}");
+        ModelState.Clear();
 
+        // Only one validation check
         if (!ModelState.IsValid)
         {
-            Console.WriteLine("ModelState errors:"); // Add this
+            Console.WriteLine("ModelState errors:");
             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
             {
                 Console.WriteLine(error.ErrorMessage);
             }
-            return View(model);
-        }
-        if (!ModelState.IsValid)
-        {
             return View(model);
         }
 
@@ -142,29 +141,69 @@ public class TaskController : Controller
             return NotFound();
         }
 
-        // Update fields
-        task.ClientName = model.ClientName;
-        task.Permit = model.Permit;
-        task.Requirements = model.Requirements; // Keep as CSV string
-        task.DoneRequirements = model.DoneRequirements; // Keep as CSV string
-        task.Progress = CalculateProgress(model.DoneRequirements, model.Requirements);
-        task.Priority = model.Priority;
+        // Ensure defaults for null values
+        task.ClientName = model.ClientName ?? "";
+        task.Permit = model.Permit ?? "";
+        task.Requirements = model.Requirements ?? "";
+        task.DoneRequirements = model.DoneRequirements ?? "";
+        task.Priority = model.Priority ?? "Normal";
 
-        _context.Tasks.Update(task);
-        await _context.SaveChangesAsync();
+        // Always calculate progress based on requirements
+        if (string.IsNullOrEmpty(task.Requirements))
+        {
+            task.Progress = 0;
+        }
+        else
+        {
+            var completed = !string.IsNullOrEmpty(task.DoneRequirements)
+                ? task.DoneRequirements.Split(',', StringSplitOptions.RemoveEmptyEntries).Length
+                : 0;
 
-        TempData["SuccessMessage"] = "Task updated successfully!";
-        return RedirectToAction("TaskFlow");
+            var total = task.Requirements.Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
+            task.Progress = (total > 0) ? (int)Math.Round((double)completed / total * 100) : 0;
+        }
+
+        Console.WriteLine($"Calculated progress: {task.Progress}");
+
+        try
+        {
+            _context.Tasks.Update(task);
+            await _context.SaveChangesAsync();
+            Console.WriteLine("Task saved successfully");
+
+            TempData["SuccessMessage"] = "Task updated successfully!";
+            return RedirectToAction("TaskFlow");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving task: {ex.Message}");
+            ModelState.AddModelError("", "An error occurred while saving the task.");
+            return View(model);
+        }
     }
 
-    // Calculate Progress
+    // Calculate Progress - Added more detailed logging
     private int CalculateProgress(string doneRequirements, string allRequirements)
     {
-        if (string.IsNullOrEmpty(allRequirements)) return 0;
+        Console.WriteLine($"Calculating progress. Done requirements: '{doneRequirements}', All requirements: '{allRequirements}'");
 
-        var completed = doneRequirements?.Split(',', StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
-        var total = allRequirements.Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
-        return (total > 0) ? (int)Math.Round((double)completed / total * 100) : 0;
+        if (string.IsNullOrEmpty(allRequirements))
+        {
+            Console.WriteLine("All requirements is null or empty, returning 0");
+            return 0;
+        }
+
+        var completedArray = doneRequirements?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+        var totalArray = allRequirements.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        var completed = completedArray.Length;
+        var total = totalArray.Length;
+
+        Console.WriteLine($"Completed items: {completed}, Total items: {total}");
+
+        int result = (total > 0) ? (int)Math.Round((double)completed / total * 100) : 0;
+        Console.WriteLine($"Calculated progress: {result}%");
+        return result;
     }
 
     // Retrieve Requirement List

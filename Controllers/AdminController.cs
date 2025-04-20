@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 [Authorize(Roles = "Admin")]
-public class AdminController : Controller
+public class AdminController : BaseController
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;

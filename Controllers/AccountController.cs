@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-public class AccountController : Controller
+public class AccountController : BaseController
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -39,4 +39,14 @@ public class AccountController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction("Login");
     }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public class DashboardController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+
 }

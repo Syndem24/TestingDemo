@@ -1,38 +1,41 @@
-﻿    @model TaskFlowModel
+﻿ @model TaskFlowModel
 
-    @{
-        ViewData["Title"] = "Edit Task";
-    }
+@{
+    ViewData["Title"] = "Edit Task";
+}
 
-    <div class="container mt-4">
-        <h2 class="text-center">
-            <i class="bi bi-pencil-square"></i> Edit Task
-        </h2>
+<div class="container mt-4">
+    <h2 class="text-center">
+        <i class="bi bi-pencil-square"></i> Edit Task
+    </h2>
 
-        <div class="alert alert-warning text-center" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            Are you sure you want to edit this task?
-        </div>
+    <div class="alert alert-warning text-center" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        Are you sure you want to edit this task?
+    </div>
 
-        <div class="card shadow-sm p-4">
-            <form method="post" asp-action="EditTask" asp-controller="Task" onsubmit="return updateHiddenRequirements();">
-                <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="card shadow-sm p-4">
+        <form method="post" asp-action="EditTask" asp-controller="Task" onsubmit="return updateHiddenRequirements();">
+            <input type="hidden" name="Id" value="@Model.Id" />
 
-                <div class="mb-3">
-                    <label class="form-label"><i class="bi bi-person"></i> Client Name:</label>
-                    <input type="text" name="ClientName" class="form-control" value="@Model.ClientName" required />
-                </div>
+            <div class="mb-3">
+                <label class="form-label"><i class="bi bi-person"></i> Client Name:</label>
+                <input type="text" name="ClientName" class="form-control" value="@Model.ClientName" required />
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label"><i class="bi bi-file-earmark"></i> Permit:</label>
-                    <input type="text" name="Permit" class="form-control" value="@Model.Permit" required />
-                </div>
+            <div class="mb-3">
+                <label class="form-label"><i class="bi bi-file-earmark"></i> Permit:</label>
+                <input type="text" name="Permit" class="form-control" value="@Model.Permit" required />
+            </div>
 
-                <!-- ✅ Requirements Section -->
-                <div class="mb-3">
-                    <label class="form-label"><i class="bi bi-list-check"></i> Requirements:  <p class="text-muted"><i class="bi bi-info-circle"></i> Please **uncheck** the requirements you do not want to include.</p></label>
+            <!-- Requirements and Completion side by side -->
+            <div class="row mb-3">
+                <!-- Requirements List -->
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-list-check"></i> Requirements:</label>
+                    <p class="text-muted"><i class="bi bi-info-circle"></i> Please <strong>uncheck</strong> the requirements you do not want to include.</p>
 
-                    <div id="requirementsList">
+                    <div id="requirementsList" class="border p-3 rounded bg-light">
                         @if (Model.RequirementList?.Any() == true)
                         {
                             @foreach (var requirement in Model.RequirementList)
@@ -53,7 +56,7 @@
                         }
                     </div>
 
-                    <!-- ✅ Add New Requirement -->
+                    <!-- Add New Requirement -->
                     <div class="input-group mt-2">
                         <input type="text" id="newRequirement" class="form-control" placeholder="Enter new requirement" />
                         <button type="button" class="btn btn-success" onclick="addRequirement()">
@@ -62,40 +65,39 @@
                     </div>
                 </div>
 
-                <!-- ✅ Hidden Input to Store Checked Requirements -->
-                <input type="hidden" id="requirements" name="Requirements" value="@Model.Requirements" />
+                <!-- Completion Checklist -->
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-check2-all"></i> Completion Checklist:</label>
+                    <p class="text-muted"><i class="bi bi-info-circle"></i> Check items as they are completed.</p>
 
-                <!-- ✅ NEW: Hidden Input to Store Completed Requirements -->
-                <input type="hidden" id="doneRequirements" name="DoneRequirements" value="@Model.DoneRequirements" />
-
-            <!-- ✅ NEW: Completion Checklist Section -->
-            <div class="mb-4">
-                <label class="form-label"><i class="bi bi-check2-all"></i> Completion Checklist:</label>
-                <p class="text-muted"><i class="bi bi-info-circle"></i> Check items as they are completed to update progress.</p>
-
-                <div id="completionChecklist" class="border p-3 rounded bg-light">
-                    @if (Model.RequirementList?.Any() == true)
-                    {
-                        @foreach (var requirement in Model.RequirementList)
+                    <div id="completionChecklist" class="border p-3 rounded bg-light">
+                        @if (Model.RequirementList?.Any() == true)
                         {
-                            bool isChecked = Model.CheckedRequirements.Contains(requirement);
-                            <div class="form-check mb-2">
-                                <input class="form-check-input completion-checkbox" type="checkbox"
-                                       id="complete_@requirement" value="@requirement"
-                                @(isChecked ? "checked" : "")
-                                       onchange="updateCompletionStatus()">
-                                <label class="form-check-label" for="complete_@requirement">
-                                    @requirement
-                                </label>
-                            </div>
+                            @foreach (var requirement in Model.RequirementList)
+                            {
+                                bool isChecked = Model.CheckedRequirements.Contains(requirement);
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input completion-checkbox" type="checkbox"
+                                           id="complete_@requirement" value="@requirement"
+                                    @(isChecked ? "checked" : "")
+                                           onchange="updateCompletionStatus()">
+                                    <label class="form-check-label" for="complete_@requirement">
+                                        @requirement
+                                    </label>
+                                </div>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <p class="text-muted">No requirements available to complete.</p>
-                    }
+                        else
+                        {
+                            <p class="text-muted">No requirements available to complete.</p>
+                        }
+                    </div>
                 </div>
             </div>
+
+            <!-- Hidden Inputs for Requirements -->
+            <input type="hidden" id="requirements" name="Requirements" value="@Model.Requirements" />
+            <input type="hidden" id="doneRequirements" name="DoneRequirements" value="@Model.DoneRequirements" />
 
             <div class="mb-3">
                 <label class="form-label"><i class="bi bi-bar-chart-line"></i> Progress (%):</label>
@@ -116,9 +118,8 @@
                     <option value="Urgent" selected="@(Model.Priority == "Urgent")">Urgent</option>
                 </select>
             </div>
-
             <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to save changes?');">
+                <button type="submit" class="btn btn-primary" id="saveButton">
                     <i class="bi bi-save"></i> Save Changes
                 </button>
                 <a href="@Url.Action("TaskFlow", "Task")" class="btn btn-secondary">
@@ -129,9 +130,9 @@
     </div>
 </div>
 
-<!-- ✅ JavaScript for Dynamic Requirements and Progress -->
+<!-- JavaScript for Dynamic Requirements and Progress -->
 <script>
-    // ✅ Initialize with the current done requirements
+    // Initialize with the current done requirements
     let currentDoneRequirements = '@Model.DoneRequirements'.split(',').filter(item => item.trim() !== '');
 
     function updateProgress() {
@@ -164,6 +165,9 @@
         progressBar.style.width = progress + "%";
         progressBar.setAttribute("aria-valuenow", progress);
         progressBar.textContent = progress + "%";
+        
+        // Update progress input
+        document.getElementById("progress").value = progress;
 
         // Update the hidden field for done requirements
         document.getElementById("doneRequirements").value = validCompletions.join(",");
@@ -231,7 +235,7 @@
         checkbox.name = "selectedRequirements";
         checkbox.value = requirement;
         checkbox.onchange = updateProgress;
-        checkbox.checked = true; // ✅ Default to checked
+        checkbox.checked = true; // Default to checked
 
         let label = document.createElement("label");
         label.className = "form-check-label flex-grow-1";
@@ -275,21 +279,23 @@
             .filter(checkbox => selectedValues.includes(checkbox.value))
             .map(checkbox => checkbox.value);
         document.getElementById("doneRequirements").value = completedValues.join(",");
-        console.log("Submitting form with progress:", document.getElementById("progress").value);
-        // return true; // Allows the form to submit
-        // let progress = parseInt(document.getElementById("progress").value);
-        // if (progress === 0) {
-        //     if (!confirm("Progress is at 0%. Are you sure you want to save?")) {
-        //         return false; // Cancel submission
-        //     }
-        // }
-
-        // return true;
+        
+        // Always allow form submission regardless of progress value
+        return true;
     }
 
-    // ✅ Ensure everything is initialized on page load
+    // Ensure everything is initialized on page load
     document.addEventListener("DOMContentLoaded", function () {
         updateCompletionChecklist();
         updateCompletionStatus();
+        
+        // Add confirmation dialog only if the user wants to save with zero progress
+        document.getElementById("saveButton").addEventListener("click", function(e) {
+            if (parseInt(document.getElementById("progress").value) === 0) {
+                if (!confirm("Progress is at 0%. Are you sure you want to save?")) {
+                    e.preventDefault(); // Prevent form submission if user cancels
+                }
+            }
+        });
     });
 </script>
