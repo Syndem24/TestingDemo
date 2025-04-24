@@ -5,13 +5,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class TaskController : BaseController   
+public class TaskController : BaseController
 {
     private readonly ApplicationDbContext _context;
 
     public TaskController(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    public IActionResult Index(string sort)
+    {
+        // Fetch tasks from the database
+        var tasks = _context.Tasks.AsQueryable();
+
+        // Apply sorting based on the 'sort' parameter
+        switch (sort)
+        {
+            case "client":
+                tasks = tasks.OrderBy(t => t.ClientName);
+                break;
+            case "permit":
+                tasks = tasks.OrderBy(t => t.Permit);
+                break;
+            case "requirements":
+                tasks = tasks.OrderBy(t => t.Requirements);
+                break;
+            case "progress":
+                tasks = tasks.OrderBy(t => t.Progress);
+                break;
+            case "priority":
+                tasks = tasks.OrderBy(t => t.Priority);
+                break;
+            case "issued":
+                tasks = tasks.OrderBy(t => t.DateIssued);
+                break;
+            default:
+                tasks = tasks.OrderByDescending(t => t.DateIssued); // Default sorting
+                break;
+        }
+
+        ViewBag.Tasks = tasks.ToList();
+        return View();
     }
 
     public async Task<IActionResult> TaskFlow()
@@ -75,6 +110,31 @@ public class TaskController : BaseController
         }
         return RedirectToAction("TaskFlow");
     }
+    // ...existing code...
+
+    public async Task<IActionResult> DeleteConfirmation(int id)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+        return View(task);
+    }
+
+    [HttpPost, ActionName("DeleteConfirmed")]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task != null)
+        {
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Task deleted successfully.";
+        }
+        return RedirectToAction(nameof(TaskFlow));
+    }
+
 
     public async Task<IActionResult> MarkAsDone(int id)
     {
