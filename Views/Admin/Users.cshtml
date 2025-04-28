@@ -1,113 +1,98 @@
-﻿@{
+﻿@model List<TestingDemo.ViewModels.UserViewModel>
+
+@{
     ViewData["Title"] = "Users List";
 }
 
-<div class="users-container">
-    <h2>Users List</h2>
+<div class="container users-container">
+    <h2 class="text-center mb-4">Users List</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in ViewBag.Users)
-            {
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
                 <tr>
-                    <td>@user.Email</td>
-                    <td>@string.Join(", ", user.Roles)</td>
-                    <td>
-                        <a href="@Url.Action("EditUser", "Admin", new { email = user.Email })" class="btn-edit">Edit</a>
-                        <a href="#" class="btn-delete" onclick="confirmDelete('@user.Email')">Delete</a>
-                    </td>
+                    <th scope="col">Email</th>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>@user.FullName</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-primary btn-sm me-2">Edit</a>
+                            <a asp-action="ConfirmDelete" asp-route-id="@user.Id" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-    <a href="@Url.Action("AddUser", "Admin")" class="btn-back">Back to Add User</a>
+    <div class="text-center mt-4">
+        <a asp-action="AddUser" class="btn btn-success">Add New User</a>
+    </div>
 </div>
 
-<!-- JavaScript: Confirm Delete -->
-<script>
-    function confirmDelete(email) {
-        if (confirm("Are you sure you want to delete this user?")) {
-            window.location.href = "/Admin/DeleteUser?email=" + encodeURIComponent(email);
-        }
-    }
-</script>
-
-<!-- CSS -->
+<!-- Styles -->
 <style>
     .users-container {
-        max-width: 700px;
+        max-width: 1200px;
         margin: 50px auto;
         padding: 20px;
         background: #ffffff;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         border-radius: 10px;
-        text-align: center;
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
+    .table-responsive {
+        overflow-x: auto;
     }
 
-    th, td {
-        padding: 10px;
+    .table th,
+    .table td {
+        vertical-align: middle;
         text-align: left;
-        border-bottom: 1px solid #ddd;
+        white-space: nowrap;
     }
 
-    th {
-        background: #007BFF;
-        color: white;
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
     }
 
-    .btn-edit, .btn-delete {
-        padding: 8px 12px;
-        font-size: 14px;
-        text-decoration: none;
-        border-radius: 5px;
-        margin-right: 5px;
-        display: inline-block;
-    }
-
-    .btn-edit {
-        background: #ffc107;
-        color: white;
-    }
-
-        .btn-edit:hover {
-            background: #e0a800;
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
         }
 
-    .btn-delete {
-        background: #dc3545;
-        color: white;
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
     }
 
-        .btn-delete:hover {
-            background: #c82333;
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+            border-color: #b02a37;
         }
 
-    .btn-back {
-        display: block;
-        margin-top: 15px;
-        padding: 10px;
-        background: #007BFF;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        text-align: center;
+    .btn-success {
+        background-color: #198754;
+        border-color: #198754;
     }
 
-        .btn-back:hover {
-            background: #0056b3;
+        .btn-success:hover {
+            background-color: #157347;
+            border-color: #146c43;
         }
+
+    h2 {
+        font-weight: bold;
+        color: #333;
+    }
 </style>

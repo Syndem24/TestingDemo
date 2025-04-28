@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace TestingDemo.Views.Task
 {
-    public class ArchiveModel : PageModel
+    public class DocumentArchiveModel : PageModel
     {
         public void OnGet()
         {

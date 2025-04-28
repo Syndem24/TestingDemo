@@ -104,7 +104,16 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
             {
                 UserName = adminEmail,
                 Email = adminEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                // Add values for all required fields
+                FullName = "Admin User",
+                Age = 30,
+                BirthDate = DateTime.Now,
+                Address = "Admin Address",
+                City = "Admin City",
+                State = "Admin State",
+                ZipCode = "12345",
+                Country = "Admin Country"
             };
 
             var result = await userManager.CreateAsync(newAdmin, adminPassword);

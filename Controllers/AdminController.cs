@@ -1,59 +1,97 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering; // ✅ Add this line
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+using TestingDemo.ViewModels;
 
 [Authorize(Roles = "Admin")]
-public class AdminController : BaseController
+public class AdminController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public AdminController(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _roleManager = roleManager;
     }
 
-    public async Task<IActionResult> AddUser()
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    public IActionResult AddUser()
     {
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddUser(string email, string password, string role)
+    public async Task<IActionResult> AddUser(
+        string email,
+        string password,
+        string fullName,
+        int age,
+        DateTime birthDate,
+        string address,
+        string city,
+        string state,
+        string zipCode,
+        string country,
+        string role)
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(role))
+        try
         {
-            ViewBag.Error = "All fields are required.";
-            return View();
-        }
+            // Check if user already exists
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser != null)
+            {
+                ViewBag.Error = "User with this email already exists.";
+                return View();
+            }
 
-        var userExists = await _userManager.FindByEmailAsync(email);
-        if (userExists != null)
-        {
-            ViewBag.Error = "User already exists.";
-            return View();
-        }
-
-        var user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true };
-        var result = await _userManager.CreateAsync(user, password);
-
-        if (result.Succeeded)
-        {
+            // Check if role exists
             if (!await _roleManager.RoleExistsAsync(role))
             {
                 await _roleManager.CreateAsync(new IdentityRole(role));
             }
-            await _userManager.AddToRoleAsync(user, role);
-            ViewBag.Success = "User added successfully!";
+
+            // Create new user with all required fields
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FullName = fullName,
+                Age = age,
+                BirthDate = birthDate,
+                Address = address,
+                City = city,
+                State = state,
+                ZipCode = zipCode,
+                Country = country
+            };
+
+            // Create the user
+            var result = await _userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+            {
+                // Assign role to user
+                await _userManager.AddToRoleAsync(user, role);
+                ViewBag.Success = $"User {email} created successfully with role {role}.";
+            }
+            else
+            {
+                ViewBag.Error = "Error creating user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ViewBag.Error = "Failed to add user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+            ViewBag.Error = "An error occurred: " + ex.Message;
         }
 
         return View();
@@ -61,79 +99,161 @@ public class AdminController : BaseController
 
     public async Task<IActionResult> Users()
     {
-        var users = _userManager.Users.ToList();
-        var userList = users.Select(user => new
-        {
-            user.Email,
-            Roles = _userManager.GetRolesAsync(user).Result
-        }).ToList();
+        var users = await _userManager.Users.ToListAsync();
+        var userViewModels = new List<UserViewModel>();
 
-        ViewBag.Users = userList;
-        return View();
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            userViewModels.Add(new UserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = roles.FirstOrDefault() ?? "No Role"
+            });
+        }
+
+        return View(userViewModels); // ✅ Strongly typed view
     }
-    // GET: Edit User
-    public async Task<IActionResult> EditUser(string email)
+    public async Task<IActionResult> UserDetails(string id)
     {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return RedirectToAction("Users");
-        }
-
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            return RedirectToAction("Users");
-        }
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
 
         var roles = await _userManager.GetRolesAsync(user);
-        ViewBag.Roles = new SelectList(await _roleManager.Roles.ToListAsync(), "Name", "Name", roles.FirstOrDefault());
 
-        return View(user);
+        var model = new UserViewModel
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Age = user.Age,
+            BirthDate = user.BirthDate,
+            Address = user.Address,
+            City = user.City,
+            State = user.State,
+            ZipCode = user.ZipCode,
+            Country = user.Country,
+            Role = roles.FirstOrDefault()
+        };
+
+        return View(model);
     }
-    // POST: Edit User
-    [HttpPost]
-    public async Task<IActionResult> EditUser(string email, string newEmail, string role, string password)
+    public async Task<IActionResult> EditUser(string id)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            return RedirectToAction("Users");
-        }
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
 
-        // Update email if changed
-        if (!string.IsNullOrWhiteSpace(newEmail) && email != newEmail)
-        {
-            user.Email = newEmail;
-            user.UserName = newEmail;
-        }
+        var roles = await _userManager.GetRolesAsync(user);
 
-        // Update password if provided
-        if (!string.IsNullOrWhiteSpace(password))
+        var model = new UserViewModel
         {
-            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            await _userManager.ResetPasswordAsync(user, resetToken, password);
-        }
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Age = user.Age,
+            BirthDate = user.BirthDate,
+            Address = user.Address,
+            City = user.City,
+            State = user.State,
+            ZipCode = user.ZipCode,
+            Country = user.Country,
+            Role = roles.FirstOrDefault()
+        };
 
-        // Update role
+        ViewBag.Roles = new SelectList(await _roleManager.Roles.Select(r => r.Name).ToListAsync());
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> EditUser(UserViewModel model)
+    {
+        var user = await _userManager.FindByIdAsync(model.Id);
+        if (user == null) return NotFound();
+
+        user.FullName = model.FullName;
+        user.Age = model.Age;
+        user.BirthDate = model.BirthDate;
+        user.Address = model.Address;
+        user.City = model.City;
+        user.State = model.State;
+        user.ZipCode = model.ZipCode;
+        user.Country = model.Country;
+
         var existingRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, existingRoles);
-        await _userManager.AddToRoleAsync(user, role);
+        await _userManager.AddToRoleAsync(user, model.Role);
 
         await _userManager.UpdateAsync(user);
         return RedirectToAction("Users");
     }
 
-
-    // DELETE: Delete User
-    public async Task<IActionResult> DeleteUser(string email)
+    [HttpPost]
+    public async Task<IActionResult> DeleteUser(string id)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByIdAsync(id);
         if (user != null)
         {
-            await _userManager.DeleteAsync(user);
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Users");
+            }
+        }
+        return RedirectToAction("Users");
+    }
+    // GET: Confirm Delete Page
+    public async Task<IActionResult> ConfirmDelete(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            TempData["ErrorMessage"] = "Invalid user ID.";
+            return RedirectToAction("Users");
+        }
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            TempData["ErrorMessage"] = "User not found.";
+            return RedirectToAction("Users");
+        }
+
+        // Pass the user details to the view
+        var viewModel = new UserViewModel
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
+        };
+
+        return View(viewModel);
+    }
+
+    // POST: Handle Deletion
+    [HttpPost]
+    public async Task<IActionResult> ConfirmDelete(UserViewModel model)
+    {
+        var user = await _userManager.FindByIdAsync(model.Id);
+        if (user == null)
+        {
+            TempData["ErrorMessage"] = "User not found.";
+            return RedirectToAction("Users");
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+        if (result.Succeeded)
+        {
+            TempData["SuccessMessage"] = "User deleted successfully.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Failed to delete user.";
         }
 
         return RedirectToAction("Users");
     }
-
 }
+
+// View model for displaying users

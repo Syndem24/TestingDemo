@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TestingDemo.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class TaskController : BaseController
 {
@@ -51,7 +53,10 @@ public class TaskController : BaseController
 
     public async Task<IActionResult> TaskFlow()
     {
-        var tasks = await _context.Tasks.Where(t => !t.IsArchived).ToListAsync();
+        var tasks = await _context.Tasks
+            .Where(t => !t.IsArchived && !t.IsDone) // Only tasks in progress
+            .ToListAsync();
+
         ViewBag.Tasks = tasks;
         return View();
     }
@@ -93,6 +98,7 @@ public class TaskController : BaseController
         {
             task.IsDone = false;
             task.IsArchived = false;
+            task.IsMovedToHistory = false;
             task.Progress = 0;
             task.DateCompleted = null;
             await _context.SaveChangesAsync();
@@ -110,7 +116,6 @@ public class TaskController : BaseController
         }
         return RedirectToAction("TaskFlow");
     }
-    // ...existing code...
 
     public async Task<IActionResult> DeleteConfirmation(int id)
     {
@@ -135,23 +140,23 @@ public class TaskController : BaseController
         return RedirectToAction(nameof(TaskFlow));
     }
 
-
     public async Task<IActionResult> MarkAsDone(int id)
     {
         var task = await _context.Tasks.FindAsync(id);
-        if (task != null)
+        if (task == null)
         {
-            task.Progress = 100;
-            task.IsDone = true;
-            task.DateCompleted = DateTime.Now;
-            task.IsArchived = true;
-
-            _context.Tasks.Update(task);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("TaskFlow");
+            return NotFound();
         }
-        return NotFound();
+
+        task.Progress = 100;
+        task.IsDone = true;
+        task.IsArchived = true; // Move it to the Archive after done
+        task.DateCompleted = DateTime.Now;
+
+        _context.Tasks.Update(task);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("TaskFlow");
     }
 
     // GET: Edit Task
@@ -323,5 +328,198 @@ public class TaskController : BaseController
             ViewBag.ErrorMessage = "An error occurred while generating analytics. Please try again later.";
             return View("Error");
         }
+    }
+
+    public async Task<IActionResult> DocumentArchive(string client = "", string permit = "", string status = "", string sort = "")
+    {
+        var query = _context.Tasks
+            .Where(t => t.IsArchived && t.IsDone && !t.IsMovedToHistory) // Must be done and archived, but not moved yet
+            .AsQueryable();
+
+        // Apply client filter if provided
+        if (!string.IsNullOrEmpty(client))
+        {
+            query = query.Where(t => t.ClientName.Contains(client));
+            ViewBag.ClientFilter = client;
+        }
+
+        // Apply permit filter if provided
+        if (!string.IsNullOrEmpty(permit))
+        {
+            query = query.Where(t => t.Permit.Contains(permit));
+            ViewBag.PermitFilter = permit;
+        }
+
+        // First, get all filtered tasks
+        List<TaskFlowModel> filteredTasks = await query.ToListAsync();
+
+        // Get total count for pagination info
+        ViewBag.TotalArchivedCount = filteredTasks.Count;
+
+        // Then apply status filter (in memory)
+        if (!string.IsNullOrEmpty(status))
+        {
+            switch (status.ToLower())
+            {
+                case "documented":
+                    filteredTasks = filteredTasks.Where(task =>
+                        !string.IsNullOrEmpty(task.DoneRequirements) &&
+                        CountRequirements(task.DoneRequirements) == CountRequirements(task.Requirements)
+                    ).ToList();
+                    break;
+
+                case "not-documented":
+                    filteredTasks = filteredTasks.Where(task =>
+                        string.IsNullOrEmpty(task.DoneRequirements) ||
+                        CountRequirements(task.DoneRequirements) == 0
+                    ).ToList();
+                    break;
+
+                case "partial":
+                    filteredTasks = filteredTasks.Where(task =>
+                        !string.IsNullOrEmpty(task.DoneRequirements) &&
+                        CountRequirements(task.DoneRequirements) > 0 &&
+                        CountRequirements(task.DoneRequirements) < CountRequirements(task.Requirements)
+                    ).ToList();
+                    break;
+            }
+            ViewBag.StatusFilter = status;
+        }
+
+        // Sorting
+        switch (sort)
+        {
+            case "client":
+                filteredTasks = filteredTasks.OrderBy(t => t.ClientName).ToList();
+                break;
+            case "permit":
+                filteredTasks = filteredTasks.OrderBy(t => t.Permit).ToList();
+                break;
+            case "issued":
+                filteredTasks = filteredTasks.OrderBy(t => t.DateIssued).ToList();
+                break;
+            case "priority":
+                filteredTasks = filteredTasks.OrderBy(t => t.Priority).ToList();
+                break;
+            default:
+                filteredTasks = filteredTasks.OrderByDescending(t => t.DateIssued).ToList();
+                break;
+        }
+
+        ViewBag.ArchivedTasks = filteredTasks;
+        return View();
+    }
+
+    // Helper method to count requirements
+    private int CountRequirements(string requirementsString)
+    {
+        if (string.IsNullOrEmpty(requirementsString))
+            return 0;
+
+        return requirementsString.Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+    // Add a method to handle document status updates
+    [HttpPost]
+    public async Task<IActionResult> UpdateDocumentation(int id, List<string> documentedItems)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        // Update the DoneRequirements with the checked items
+        task.DoneRequirements = documentedItems != null ? string.Join(",", documentedItems) : "";
+
+        // Calculate progress based on documentation status
+        var totalRequirements = task.RequirementList.Count;
+        var completedRequirements = documentedItems?.Count ?? 0;
+        task.Progress = totalRequirements > 0 ? (completedRequirements * 100) / totalRequirements : 0;
+
+        await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Documentation status updated successfully!";
+
+        return RedirectToAction("DocumentArchive");
+    }
+
+    // Add a method to show the documentation editing form
+    public async Task<IActionResult> EditDocumentation(int id)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        return View(task);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MoveToHistory(int id)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        task.IsMovedToHistory = true; // Mark as moved
+        task.CompletedAt = DateTime.Now;
+
+        _context.Tasks.Update(task);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Task has been fully documented and moved to history.";
+        return RedirectToAction("DocumentArchive"); // Refresh DocumentArchive after move
+    }
+
+    public async Task<IActionResult> History()
+    {
+        var historyTasks = await _context.Tasks
+            .Where(t => t.IsArchived && t.IsMovedToHistory)
+            .ToListAsync();
+
+        return View(historyTasks);
+    }
+
+    // Optional: Add view details action for history items
+    public async Task<IActionResult> TaskDetails(int id)
+    {
+        var task = await _context.Tasks.FindAsync(id);
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        return View(task);
+    }
+    // Add this method to TaskController.cs
+    [HttpPost]
+    public async Task<IActionResult> ClearHistory()
+    {
+        try
+        {
+            var historyTasks = await _context.Tasks
+                .Where(t => t.IsArchived && t.IsMovedToHistory)
+                .ToListAsync();
+
+            if (historyTasks.Any())
+            {
+                _context.Tasks.RemoveRange(historyTasks);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Task history has been cleared successfully.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "No history tasks to clear.";
+            }
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "An error occurred while clearing history: " + ex.Message;
+        }
+
+        return RedirectToAction("History");
     }
 }
