@@ -24,12 +24,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     // Ensure ApplicationUser is registered
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-    public DbSet<TaskFlowModel> Tasks { get; set; }
+
     public DbSet<AcquiringRequestModel> AcquiringRequests { get; set; }
+
+    public DbSet<ClientModel> Clients { get; set; }
+
+    public DbSet<PermitRequirementModel> PermitRequirements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        // Additional model configurations if needed
+
+        // Configure the relationship between Client and PermitRequirement
+        builder.Entity<PermitRequirementModel>()
+            .HasOne(pr => pr.Client)
+            .WithMany()
+            .HasForeignKey(pr => pr.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

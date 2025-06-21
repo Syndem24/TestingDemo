@@ -1,0 +1,159 @@
+@model TestingDemo.Models.ClientModel
+@using TestingDemo.Models
+
+@{
+    ViewData["Title"] = "Client Details";
+    var requirements = ViewBag.Requirements as List<PermitRequirementModel>;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_PlanningOfficerNav")
+        </div>
+        <div class="col-md-9">
+            <div class="row mb-4">
+                <div class="col">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Client Details</li>
+                        </ol>
+                    </nav>
+                    <h2><i class="bi bi-file-earmark-text"></i> Client Details</h2>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Client Information</h5>
+                    <div>
+                        <a asp-action="PlanRequirements" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="bi bi-list-check"></i> Plan Requirements
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ClientName)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.ClientName)</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ContactNumber)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.ContactNumber)</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Address)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PermitType)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.PermitType)</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UrgencyLevel)</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.UrgencyLevel == "Urgent")
+                                    {
+                                        <span class="badge bg-danger">Urgent</span>
+                                    }
+                                    else if (Model.UrgencyLevel == "Slightly Urgent")
+                                    {
+                                        <span class="badge bg-warning text-dark">Slightly Urgent</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Normal</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Status)</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else if (Model.Status == "Planning")
+                                    {
+                                        <span class="badge bg-info">In Planning</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">@Model.Status</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Permit Requirements</h5>
+                </div>
+                <div class="card-body">
+                    @if (requirements != null && requirements.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Requirement</th>
+                                        <th>Description</th>
+                                        <th>Required</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var req in requirements)
+                                    {
+                                        <tr>
+                                            <td>@req.RequirementName</td>
+                                            <td>@req.Description</td>
+                                            <td>
+                                                @if (req.IsRequired)
+                                                {
+                                                    <span class="badge bg-danger">Required</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Optional</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (req.IsCompleted)
+                                                {
+                                                    <span class="badge bg-success">Completed</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No requirements have been defined yet.
+                            <a asp-action="PlanRequirements" asp-route-id="@Model.Id" class="alert-link">Click here to plan
+                                requirements</a>.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

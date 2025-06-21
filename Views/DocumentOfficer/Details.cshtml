@@ -1,0 +1,44 @@
+@model TestingDemo.Models.ClientModel
+@{
+    ViewData["Title"] = "Client Details";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-person-lines-fill"></i> @ViewData["Title"]</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Client: @Model.ClientName</h5>
+            <span class="badge bg-info">@Model.Status</span>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Client Name</dt>
+                <dd class="col-sm-9">@Model.ClientName</dd>
+
+                <dt class="col-sm-3">Contact Number</dt>
+                <dd class="col-sm-9">@Model.ContactNumber</dd>
+
+                <dt class="col-sm-3">Email Address</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Address</dt>
+                <dd class="col-sm-9">@Model.Address</dd>
+
+                <dt class="col-sm-3">Permit Type</dt>
+                <dd class="col-sm-9">@Model.PermitType</dd>
+
+                <dt class="col-sm-3">Urgency Level</dt>
+                <dd class="col-sm-9">@Model.UrgencyLevel</dd>
+
+                <dt class="col-sm-3">Date Created</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("g")</dd>
+            </dl>
+        </div>
+        <div class="card-footer bg-light">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>

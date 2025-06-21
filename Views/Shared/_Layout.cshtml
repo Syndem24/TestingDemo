@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,128 +13,166 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    
+
     <style>
         /* Custom Styling */
         .navbar-brand img {
-            width: 50px; /* Wider */
+            width: 50px;
+            /* Wider */
             height: auto;
-            filter: invert(1); /* Makes the image white */
+            filter: invert(1);
+            /* Makes the image white */
         }
+
         .navbar-nav .nav-link {
             font-weight: 500;
             padding: 0.75rem;
         }
+
         .dropdown-menu {
             min-width: 200px;
         }
+
         .footer {
             background: #f8f9fa;
             font-size: 14px;
         }
+
+        /* Dropdown menu: make all text and icons black */
+        .dropdown-menu,
+        .dropdown-menu .dropdown-item,
+        .dropdown-menu .dropdown-item i {
+            color: #000 !important;
+        }
+
+        .dropdown-menu .dropdown-item.active,
+        .dropdown-menu .dropdown-item:active {
+            background-color: #e9ecef !important;
+            color: #000 !important;
+        }
+
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus {
+            color: #000 !important;
+            background-color: #f1f1f1 !important;
+        }
     </style>
 </head>
+
 <body>
 
-<header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <!-- Brand Logo -->
-            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
-                <img src="~/css/CPCPA.svg" alt="Logo"> CPCPA
-            </a>
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container">
+                <!-- Brand Logo -->
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    <img src="~/css/CPCPA.svg" alt="Logo"> CPCPA
+                </a>
 
-            <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <!-- Mobile Toggle Button -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <!-- Navbar Links -->
-            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                <!-- Left Navigation -->
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-controller="Home" asp-action="Index">
-                            <i class="bi bi-house-door"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-controller="Home" asp-action="Privacy">
-                            <i class="bi bi-shield-lock"></i> Privacy
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- Right Side: User Authentication -->
-                <ul class="navbar-nav">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> @User.Identity.Name
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Admin" asp-action="AddUser">
-                                            <i class="bi bi-people"></i> Manage Users
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Task" asp-action="TaskFlow">
-                                            <i class="bi bi-kanban"></i> Task Flow Management
-                                        </a>
-                                    </li>
-                                }
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Task" asp-action="Analytics">
-                                        <i class="bi bi-bar-chart"></i> Analytics
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    }
-                    else
-                    {
+                <!-- Navbar Links -->
+                <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                    <!-- Left Navigation -->
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="btn btn-success text-white px-3" asp-controller="Account" asp-action="Login">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door"></i> Home
                             </a>
                         </li>
-                    }
-                </ul>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Home" asp-action="Privacy">
+                                <i class="bi bi-shield-lock"></i> Privacy
+                            </a>
+                        </li>                        
+                    </ul>
+
+                    <!-- Right Navigation -->
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i> @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i class="bi bi-people"></i> Manage Users</a></li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
+                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i class="bi bi-folder-check"></i> Document Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Task" asp-action="Analytics"><i class="bi bi-bar-chart"></i> Analytics</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i class="bi bi-archive-fill"></i> Archive</a></li>
+                                    }
+                                    else if (User.IsInRole("Finance"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
+                                    }
+                                    else if (User.IsInRole("DocumentOfficer"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i class="bi bi-folder-check"></i> Document Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i class="bi bi-archive-fill"></i> Archive</a></li>
+                                    }
+                                    else if (User.IsInRole("PlanningOfficer"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                    }
+                                    else if (User.IsInRole("CustomerCare"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
-</header>
+        </nav>
+    </header>
 
-<!-- Main Content -->
-<div class="container mt-4">
-    <main role="main" class="pb-4">
-        @RenderBody()
-    </main>
-</div>
-
-<!-- Footer -->
-<footer class="footer text-center py-3 shadow">
-    <div class="container">
-        &copy; 2025 - CPCPA | <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
-</footer>
 
-<!-- JavaScript -->
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <!-- Footer -->
+    <footer class="footer border-top text-muted bg-light">
+        <div class="container text-center py-3">
+            &copy; 2025 - CPCPA - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
-</html>
 
+</html>

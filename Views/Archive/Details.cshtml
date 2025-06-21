@@ -1,0 +1,100 @@
+@model TestingDemo.Models.ClientModel
+@using TestingDemo.Models
+@{
+    ViewData["Title"] = "Archived Client Details";
+    var requirements = ViewBag.Requirements as List<PermitRequirementModel> ?? new List<PermitRequirementModel>();
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-person-bounding-box"></i> @ViewData["Title"]</h2>
+
+    <div class="row">
+        <!-- Client Details Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Client: @Model.ClientName</h5>
+                    <span class="badge bg-secondary">@Model.Status</span>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Client Name</dt>
+                        <dd class="col-sm-8">@Model.ClientName</dd>
+
+                        <dt class="col-sm-4">Contact Number</dt>
+                        <dd class="col-sm-8">@Model.ContactNumber</dd>
+
+                        <dt class="col-sm-4">Email Address</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">@Model.Address</dd>
+
+                        <dt class="col-sm-4">Permit Type</dt>
+                        <dd class="col-sm-8">@Model.PermitType</dd>
+
+                        <dt class="col-sm-4">Urgency Level</dt>
+                        <dd class="col-sm-8">@Model.UrgencyLevel</dd>
+
+                        <dt class="col-sm-4">Date Created</dt>
+                        <dd class="col-sm-8">@Model.CreatedDate.ToString("g")</dd>
+                    </dl>
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Optional Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Tax ID</dt>
+                                <dd class="col-sm-8">@(Model.TaxId ?? "N/A")</dd>
+                                
+                                <dt class="col-sm-4">Financial Year</dt>
+                                <dd class="col-sm-8">@(Model.FinancialYear ?? "N/A")</dd>
+
+                                <dt class="col-sm-4">Financial Notes</dt>
+                                <dd class="col-sm-8">@(Model.FinancialNotes ?? "N/A")</dd>
+
+                                <dt class="col-sm-4">Document References</dt>
+                                <dd class="col-sm-8">@(Model.DocumentReferences ?? "N/A")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Permit Requirements History</h5>
+                </div>
+                <div class="card-body">
+                    @if (requirements.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var req in requirements)
+                            {
+                                <li class="list-group-item">
+                                    <strong>@req.RequirementName</strong><br>
+                                    <small class="text-muted">@req.Description</small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No requirements were recorded for this client.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Archive
+        </a>
+    </div>
+</div>

@@ -21,8 +21,8 @@ namespace TestingDemo.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var tasks = await _context.Tasks.Where(t => !t.IsArchived).ToListAsync();
-            ViewBag.Tasks = tasks ?? new List<TaskFlowModel>(); // ✅ Ensure ViewBag.Tasks is not null
+            //var tasks = await _context.Tasks.Where(t => !t.IsArchived).ToListAsync();
+            //ViewBag.Tasks = tasks ?? new List<TaskFlowModel>(); // ✅ Ensure ViewBag.Tasks is not null
             return View();
         }
 

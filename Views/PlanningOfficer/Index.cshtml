@@ -1,0 +1,173 @@
+@model PaginatedList<TestingDemo.Models.ClientModel>
+@using TestingDemo.Models
+
+@{
+    ViewData["Title"] = "Finance Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0"><i class="bi bi-cash-coin"></i> @ViewData["Title"]</h2>
+            <p class="text-muted">Manage clients, financial details, and submissions.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Client
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Client List</h5>
+                <form asp-action="Index" method="get" class="d-flex align-items-center">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Find by name...">
+                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>
+                                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Client Name</a>
+                                </th>
+                                <th>Contact</th>
+                                <th>Permit Type</th>
+                                <th>Status</th>
+                                <th>
+                                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Created Date</a>
+                                </th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
+                                    <td>
+                                        <div class="fw-medium">@item.ClientName</div>
+                                        <div class="text-muted small">@item.Email</div>
+                                    </td>
+                                    <td>@item.ContactNumber</td>
+                                    <td>@item.PermitType</td>
+                                    <td>
+                                        <span class="badge @(item.Status == "Finance" ? "bg-primary" : "bg-secondary")">@item.Status</span>
+                                        @if (!string.IsNullOrEmpty(item.PlanningReturnNote))
+                                        {
+                                            <i class="bi bi-info-circle-fill text-warning" data-bs-toggle="tooltip" title="Returned from Planning: @item.PlanningReturnNote"></i>
+                                        }
+                                    </td>
+                                    <td>@item.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" data-bs-toggle="tooltip" title="View Details"><i class="bi bi-eye"></i></a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit Client"><i class="bi bi-pencil"></i></a>
+                                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id" title="Delete Client"><i class="bi bi-trash"></i></button>
+                                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sendToPlanningModal-@item.Id" title="Send to Planning Officer"><i class="bi bi-send"></i></button>
+                                        </div>
+
+                                        <!-- Modals -->
+                                        <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1">
+                                             <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete <strong>@item.ClientName</strong>? This action cannot be undone.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="sendToPlanningModal-@item.Id" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Submission</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to send <strong>@item.ClientName</strong> to the Planning Officer?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form asp-action="SendToPlanningOfficer" asp-route-id="@item.Id" method="post">
+                                                            <button type="submit" class="btn btn-success">Send to Planning</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info m-3">
+                    <i class="bi bi-info-circle"></i> No clients found.
+                </div>
+            }
+        </div>
+        <div class="card-footer bg-light">
+            <nav aria-label="Page navigation">
+                @{
+                    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+                }
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item @prevDisabled">
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-pageNumber="@(Model.PageIndex - 1)"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                           class="page-link">&laquo; Previous</a>
+                    </li>
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">Page @Model.PageIndex of @Model.TotalPages</span>
+                    </li>
+                    <li class="page-item @nextDisabled">
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-pageNumber="@(Model.PageIndex + 1)"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                           class="page-link">Next &raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

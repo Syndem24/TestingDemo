@@ -1,0 +1,106 @@
+@model TestingDemo.Models.ClientModel
+
+@{
+    ViewData["Title"] = "Delete Client";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Clients</a></li>
+                    <li class="breadcrumb-item active">Delete Client</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-trash"></i> Delete Client</h2>
+        </div>
+    </div>
+
+    <div class="alert alert-danger mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i> Are you sure you want to delete this client? This action cannot
+        be undone.
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Client Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ClientName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.ClientName)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ContactNumber)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.ContactNumber)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Address)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PermitType)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.PermitType)</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UrgencyLevel)</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.UrgencyLevel == "Urgent")
+                            {
+                                <span class="badge bg-danger">Urgent</span>
+                            }
+                            else if (Model.UrgencyLevel == "Slightly Urgent")
+                            {
+                                <span class="badge bg-warning text-dark">Slightly Urgent</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Normal</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Status)</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Status == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark">@Model.Status</span>
+                            }
+                            else if (Model.Status == "Approved")
+                            {
+                                <span class="badge bg-success">@Model.Status</span>
+                            }
+                            else if (Model.Status == "Rejected")
+                            {
+                                <span class="badge bg-danger">@Model.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@Model.Status</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <p class="text-muted small mb-2">You are about to delete this client. This action cannot be undone. Hover
+                over any button to see what will happen before you click.</p>
+
+            <form asp-action="Delete" method="post" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip"
+                    title="Permanently delete this client.">
+                    <i class="bi bi-trash"></i> Confirm Delete
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                    title="Cancel and return to the client list. No changes will be made.">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

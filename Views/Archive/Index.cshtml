@@ -1,0 +1,90 @@
+@model PaginatedList<TestingDemo.Models.ClientModel>
+@using TestingDemo.Models
+
+@{
+    ViewData["Title"] = "Client Archive";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-archive-fill"></i> @ViewData["Title"]</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-muted"><i class="bi bi-clock-history"></i> Archived Client History</h5>
+                <form asp-action="Index" method="get" class="d-flex align-items-center">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control"
+                            placeholder="Find by name...">
+                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
+                                        asp-route-currentFilter="@ViewData["CurrentFilter"]">Client</a></th>
+                                <th>Contact</th>
+                                <th>Permit Type</th>
+                                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]"
+                                        asp-route-currentFilter="@ViewData["CurrentFilter"]">Archived Date</a></th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.ClientName</td>
+                                    <td>@item.ContactNumber</td>
+                                    <td>@item.PermitType</td>
+                                    <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                    <td class="text-center">
+                                        <a asp-controller="Archive" asp-action="Details" asp-route-id="@item.Id"
+                                            class="btn btn-outline-info btn-sm" title="View Details"><i
+                                                class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info m-3">
+                    <i class="bi bi-info-circle"></i> No archived clients found.
+                </div>
+            }
+        </div>
+        <div class="card-footer bg-light">
+            <nav aria-label="Page navigation">
+                @{
+                    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+                }
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item @prevDisabled">
+                        <a asp-action="Index" asp-route-sortOrder="@ViewData["CurrentSort"]"
+                            asp-route-pageNumber="@(Model.PageIndex - 1)"
+                            asp-route-currentFilter="@ViewData["CurrentFilter"]" class="page-link">&laquo; Previous</a>
+                    </li>
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">Page @Model.PageIndex of @Model.TotalPages</span>
+                    </li>
+                    <li class="page-item @nextDisabled">
+                        <a asp-action="Index" asp-route-sortOrder="@ViewData["CurrentSort"]"
+                            asp-route-pageNumber="@(Model.PageIndex + 1)"
+                            asp-route-currentFilter="@ViewData["CurrentFilter"]" class="page-link">Next &raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

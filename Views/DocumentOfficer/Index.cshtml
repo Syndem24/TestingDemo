@@ -1,0 +1,71 @@
+@model IEnumerable<TestingDemo.Models.ClientModel>
+@{
+    ViewData["Title"] = "Document Officer Dashboard";
+}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-folder-check"></i> Document Officer Dashboard</h2>
+        <a asp-controller="Archive" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-archive-fill"></i> View Client Archive
+        </a>
+    </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="card shadow">
+        <div class="card-header bg-light py-2">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Clients for Document Officer</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Client</th>
+                            <th>Contact</th>
+                            <th>Permit Type</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.ClientName</td>
+                                <td>@item.ContactNumber</td>
+                                <td>@item.PermitType</td>
+                                <td><span class="badge bg-info">@item.Status</span></td>
+                                <td class="text-center">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm"
+                                        title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <form asp-action="ProceedToFinance" asp-route-id="@item.Id" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-success btn-sm"
+                                            title="Done Documenting (Proceed to Finance)">
+                                            <i class="bi bi-check-circle"></i> Done
+                                        </button>
+                                    </form>
+                                    <form asp-action="ReturnToCustomerCare" asp-route-id="@item.Id" method="post"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('Are you sure you want to return this client to Customer Care (Received)?');">
+                                        <button type="submit" class="btn btn-warning btn-sm"
+                                            title="Return to Customer Care (Received)">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

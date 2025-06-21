@@ -1,0 +1,76 @@
+@model TestingDemo.Models.ClientModel
+@using TestingDemo.Models
+@{
+    ViewData["Title"] = "Client Inspection";
+    var requirements = ViewBag.Requirements as List<PermitRequirementModel> ?? new List<PermitRequirementModel>();
+}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-eye"></i> Client Inspection</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <strong>Client Information</strong>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.ClientName</dd>
+                <dt class="col-sm-3">Contact</dt>
+                <dd class="col-sm-9">@Model.ContactNumber</dd>
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+                <dt class="col-sm-3">Permit Type</dt>
+                <dd class="col-sm-9">@Model.PermitType</dd>
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9"><span class="badge bg-info">@Model.Status</span></dd>
+            </dl>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <strong>Requirements Inspection</strong>
+        </div>
+        <div class="card-body">
+            <form asp-action="SaveRequirements" asp-route-id="@Model.Id" method="post">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">Present</th>
+                            <th>Requirement</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var req in requirements)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="present_@req.Id" class="form-check-input"
+                                        style="width:1.2em;height:1.2em;" @(req.IsPresent ? "checked" : "") />
+                                </td>
+                                <td>@req.RequirementName</td>
+                                <td>@req.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Inspection
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

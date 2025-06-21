@@ -1,0 +1,120 @@
+@model IEnumerable<TestingDemo.Models.ClientModel>
+
+@{
+    ViewData["Title"] = "Planning Clients";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_PlanningOfficerNav")
+        </div>
+        <div class="col-md-9">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2><i class="bi bi-list-task"></i> Planning Clients</h2>
+                    <p class="text-muted">Clients currently in the planning stage. You can edit, plan requirements, or proceed to Customer Care.</p>
+                </div>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="mb-0"><i class="bi bi-list-task"></i> Planning Clients</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>@Html.DisplayNameFor(model => model.ClientName)</th>
+                                        <th>@Html.DisplayNameFor(model => model.ContactNumber)</th>
+                                        <th>@Html.DisplayNameFor(model => model.PermitType)</th>
+                                        <th>@Html.DisplayNameFor(model => model.UrgencyLevel)</th>
+                                        <th>@Html.DisplayNameFor(model => model.Status)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
+                                            <td>@Html.DisplayFor(modelItem => item.ClientName)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.ContactNumber)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.PermitType)</td>
+                                            <td>
+                                                @if (item.UrgencyLevel == "Urgent")
+                                                {
+                                                    <span class="badge bg-danger">Urgent</span>
+                                                }
+                                                else if (item.UrgencyLevel == "Slightly Urgent")
+                                                {
+                                                    <span class="badge bg-warning text-dark">Slightly Urgent</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">Normal</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@item.Status</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info"
+                                                        data-bs-toggle="tooltip" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"
+                                                        data-bs-toggle="tooltip" title="Edit Client">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a asp-action="PlanRequirements" asp-route-id="@item.Id" class="btn btn-sm btn-primary"
+                                                        data-bs-toggle="tooltip" title="Plan Requirements">
+                                                        <i class="bi bi-list-check"></i>
+                                                    </a>
+                                                    <form asp-action="ProceedToLiaison" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                                        <button type="submit" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Proceed to Customer Care">
+                                                            <i class="bi bi-check-lg"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No completed clients found.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

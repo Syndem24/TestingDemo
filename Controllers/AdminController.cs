@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering; // ✅ Add this line
 using Microsoft.EntityFrameworkCore;
 using TestingDemo.ViewModels;
+using TestingDemo.Models; // Add this for ApplicationUser
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller

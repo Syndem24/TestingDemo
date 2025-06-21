@@ -32,6 +32,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
     context.Database.Migrate();
+    context.Database.EnsureCreated(); // Ensure database is created
 
     await CreateRoles(services);
     await CreateAdminUserAsync(services);
@@ -44,15 +45,20 @@ app.UseRouting();
 // ✅ Cache Prevention Middleware — must be before authentication
 app.Use(async (context, next) =>
 {
-    await next();
-
     if (context.User.Identity?.IsAuthenticated == true)
     {
-        context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-        context.Response.Headers["Pragma"] = "no-cache";
-        context.Response.Headers["Expires"] = "0";
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.Response.Headers["Pragma"] = "no-cache";
+            context.Response.Headers["Expires"] = "0";
+            return Task.CompletedTask;
+        });
     }
+
+    await next();
 });
+
 
 app.UseAuthentication();
 app.UseAuthorization();

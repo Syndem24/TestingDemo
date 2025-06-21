@@ -1,0 +1,438 @@
+@model TestingDemo.Models.ClientModel
+@using TestingDemo.Models
+
+@{
+    ViewData["Title"] = "Plan Requirements";
+    var requirements = ViewBag.Requirements as List<PermitRequirementModel> ?? new List<PermitRequirementModel>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2">
+            @await Html.PartialAsync("_PlanningOfficerNav")
+        </div>
+        <div class="col-md-9 col-lg-10">
+            <!-- Header and Actions -->
+            <div class="mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">Client Details</a>
+                        </li>
+                        <li class="breadcrumb-item active">Plan Requirements</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-list-check"></i> Plan Requirements</h5>
+                    <div class="d-flex gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-plus-circle"></i> Add Requirement
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i
+                                                class="bi bi-people"></i> Manage Users</a></li>
+                                    <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                class="bi bi-person-badge"></i> Customer Care</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i
+                                                class="bi bi-cash-coin"></i> Finance</a></li>
+                                    <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i
+                                                class="bi bi-folder-check"></i> Document Officer</a></li>
+                                    <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i
+                                                class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Task" asp-action="Analytics"><i
+                                                class="bi bi-bar-chart"></i> Analytics</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i
+                                                class="bi bi-archive-fill"></i> Archive</a></li>
+                                }
+                                else if (User.IsInRole("Finance"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i
+                                                class="bi bi-cash-coin"></i> Finance</a></li>
+                                    <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                class="bi bi-person-badge"></i> Customer Care</a></li>
+                                }
+                                else if (User.IsInRole("DocumentOfficer"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i
+                                                class="bi bi-folder-check"></i> Document Officer</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i
+                                                class="bi bi-archive-fill"></i> Archive</a></li>
+                                }
+                                else if (User.IsInRole("PlanningOfficer"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i
+                                                class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                }
+                                else if (User.IsInRole("CustomerCare"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                class="bi bi-person-badge"></i> Customer Care</a></li>
+                                }
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-box-arrow-right"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                    <i class="bi bi-exclamation-circle-fill"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Client Info Card -->
+            <div class="card mb-3">
+                <div class="card-header py-2 bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <strong>@Model.ClientName</strong>
+                            @if (Model.UrgencyLevel == "Urgent")
+                            {
+                                <span class="badge bg-danger ms-2">Urgent</span>
+                            }
+                            else if (Model.UrgencyLevel == "Slightly Urgent")
+                            {
+                                <span class="badge bg-warning text-dark ms-2">Slightly Urgent</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success ms-2">Normal</span>
+                            }
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">Permit Type:</small> @Model.PermitType
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer py-2 bg-light-subtle">
+                    <small class="text-muted">Client Address:</small>
+                    <span>@Model.Address</span>
+                </div>
+            </div>
+
+            <!-- Quick Add Form (initially hidden) -->
+            <div class="card mb-3" id="quickAddForm" style="display:none;">
+                <div class="card-header py-2 bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>Quick Add Requirement</strong>
+                        <button type="button" class="btn-close btn-sm" id="closeQuickAdd"></button>
+                    </div>
+                </div>
+                <div class="card-body py-3">
+                    <form id="quickAddFormInner" method="get">
+                        <input type="hidden" id="clientId" value="@Model.Id">
+
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label small">Requirement List</label>
+                                <textarea id="reqName" class="form-control form-control-sm" rows="4"
+                                    placeholder="Enter each requirement on a separate line" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small">Description</label>
+                                <textarea id="reqDescription" class="form-control form-control-sm" rows="4"
+                                    placeholder="Description" required></textarea>
+                                <div class="mt-2 text-end">
+                                    <button type="button" id="addReqBtn" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus-lg me-1"></i>Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Requirements Table Card -->
+            <div class="card">
+                <div class="card-header py-2 bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>Requirements List</strong>
+                        <div>
+                            <span class="badge bg-secondary rounded-pill">@requirements.Count</span>
+                            @if (requirements.Any(r => r.IsCompleted))
+                            {
+                                <span class="badge bg-success ms-1">@requirements.Count(r => r.IsCompleted) Completed</span>
+                            }
+                            @if (requirements.Any(r => r.IsRequired && !r.IsCompleted))
+                            {
+                                <span class="badge bg-danger ms-1">@requirements.Count(r => r.IsRequired && !r.IsCompleted)
+                                    Required</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (requirements.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:30px;" class="text-center">#</th>
+                                        <th>Requirement</th>
+                                        <th>Description</th>
+                                        <th style="width:90px" class="text-center">Required</th>
+                                        <th style="width:90px" class="text-center">Status</th>
+                                        <th style="width:140px" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < requirements.Count; i++)
+                                    {
+                                        var item = requirements[i];
+                                        <tr
+                                            class="@(item.IsRequired && !item.IsCompleted ? "table-danger" : item.IsCompleted ? "table-success" : "")">
+                                            <td class="text-center">@(i + 1)</td>
+                                            <td><strong>@item.RequirementName</strong></td>
+                                            <td>@item.Description</td>
+                                            <td class="text-center">
+                                                @if (item.IsRequired)
+                                                {
+                                                    <span class="badge bg-danger">Required</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Optional</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input status-toggle" type="checkbox"
+                                                        data-id="@item.Id" @(item.IsCompleted ? "checked" : "")>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-action="EditRequirement" asp-route-id="@item.Id"
+                                                        class="btn btn-outline-primary">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-bs-toggle="modal" data-bs-target="#viewRequirementModal-@item.Id">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger delete-req-btn"
+                                                        data-id="@item.Id" data-name="@item.RequirementName">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- View Requirement Modal -->
+                                                <div class="modal fade" id="viewRequirementModal-@item.Id" tabindex="-1">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">@item.RequirementName</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <dl class="row">
+                                                                    <dt class="col-sm-4">Description:</dt>
+                                                                    <dd class="col-sm-8">@item.Description</dd>
+
+                                                                    <dt class="col-sm-4">Required:</dt>
+                                                                    <dd class="col-sm-8">
+                                                                        @(item.IsRequired ? "Yes" : "No")
+                                                                    </dd>
+
+                                                                    <dt class="col-sm-4">Status:</dt>
+                                                                    <dd class="col-sm-8">
+                                                                        @(item.IsCompleted ? "Completed" : "Pending")
+                                                                    </dd>
+
+                                                                    <dt class="col-sm-4">Created:</dt>
+                                                                    <dd class="col-sm-8">@item.CreatedDate.ToString("g")</dd>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <a asp-action="EditRequirement" asp-route-id="@item.Id"
+                                                                    class="btn btn-primary">Edit</a>
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info m-3">
+                            <i class="bi bi-info-circle"></i> No requirements defined yet.
+                            Click the "Add Requirement" button to get started.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-2 text-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Save Changes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h6 class="modal-title">Delete Confirmation</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this requirement?
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteRequirement" method="post">
+                    <input type="hidden" id="deleteItemId" name="id" value="0" />
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Requirement Modal (Detailed) -->
+<div class="modal fade" id="addRequirementModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Requirement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddRequirement" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="ClientId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Requirement List</label>
+                        <textarea name="RequirementName" class="form-control" rows="5" required></textarea>
+                        <div class="form-text text-muted">Enter each requirement on a separate line</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Description" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="IsRequired" class="form-check-input" id="isRequiredCheck"
+                            checked />
+                        <label class="form-check-label" for="isRequiredCheck">Is Required</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Requirement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Show/hide quick add form
+            $('#quickAddBtn').click(function () {
+                $('#quickAddForm').slideDown();
+                $('#reqName').focus();
+            });
+
+            $('#closeQuickAdd').click(function () {
+                $('#quickAddForm').slideUp();
+            });
+
+            // Add requirement via the simple endpoint
+            $('#addReqBtn').click(function () {
+                const clientId = $('#clientId').val();
+                const name = $('#reqName').val();
+                const desc = $('#reqDescription').val();
+
+                if (!name || !desc) {
+                    alert('Name and Description are required');
+                    return;
+                }
+
+                // Go to the QuickAddRequirement endpoint
+                window.location.href = `/PlanningOfficer/QuickAddRequirement/${clientId}?name=${encodeURIComponent(name)}&description=${encodeURIComponent(desc)}`;
+            });
+
+            // Setup delete modal
+            $('.delete-req-btn').click(function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+
+                $('#deleteItemId').val(id);
+                $('#deleteModal .modal-body').html(`Are you sure you want to delete <strong>${name}</strong>?`);
+                $('#deleteModal').modal('show');
+            });
+
+            // Toggle requirement status (completed/pending)
+            $('.status-toggle').change(function () {
+                const id = $(this).data('id');
+                const isCompleted = $(this).prop('checked');
+
+                // Send AJAX request to update status
+                $.post(`/PlanningOfficer/ToggleRequirementStatus/${id}`, { isCompleted: isCompleted }, function (data) {
+                    if (data.success) {
+                        // Success message
+                        const message = `<div class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                                                                                                <i class="bi bi-check-circle-fill"></i> Status updated successfully!
+                                                                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                                            </div>`;
+
+                        // Prepend message to the container
+                        $('.col-md-9').prepend(message);
+
+                        // Reload page after a short delay
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        alert("Error updating status. Please try again.");
+                    }
+                }).fail(function () {
+                    alert("Error updating status. Please try again.");
+                    // Reset the checkbox to its previous state
+                    $(this).prop('checked', !isCompleted);
+                });
+            });
+        });
+    </script>
+}

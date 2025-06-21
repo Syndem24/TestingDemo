@@ -1,0 +1,280 @@
+@model TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>
+@using TestingDemo.Models
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Planning Officer Dashboard";
+    var requirementCounts = ViewBag.RequirementCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var requirementsByClient = ViewBag.Requirements as IDictionary<int, List<PermitRequirementModel>> ?? new Dictionary<int, List<PermitRequirementModel>>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2">
+            @await Html.PartialAsync("_PlanningOfficerNav")
+        </div>
+        <div class="col-md-9 col-lg-10">
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4><i class="bi bi-clipboard-check"></i> Planning Officer Dashboard</h4>
+                        <p class="text-muted">Manage permit requirements for clients</p>
+                    </div>
+                    <div>
+                        <a asp-action="PlanningClients" class="btn btn-outline-info">
+                            <i class="bi bi-list-task"></i> View Planning Clients
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> @ViewData["ListTitle"]</h5>
+                        <span class="badge bg-primary rounded-pill">@Model.Count()</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Client</th>
+                                        <th>Permit Type</th>
+                                        <th>Requirements</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th class="text-center" style="width:120px">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        var hasRequirements = requirementsByClient.ContainsKey(item.Id);
+                                        var allRequirementsCompleted = false;
+                                        var totalRequirements = 0;
+                                        var completedRequirements = 0;
+
+                                        if (hasRequirements)
+                                        {
+                                            var reqList = requirementsByClient[item.Id];
+                                            if (reqList != null && reqList.Any())
+                                            {
+                                                totalRequirements = reqList.Count;
+                                                completedRequirements = reqList.Count(r => r.IsCompleted);
+                                                allRequirementsCompleted = totalRequirements > 0 && totalRequirements == completedRequirements;
+                                            }
+                                            else
+                                            {
+                                                allRequirementsCompleted = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            allRequirementsCompleted = true;
+                                        }
+
+                                        <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
+                                            <td>
+                                                <div class="fw-medium">@item.ClientName</div>
+                                                <div class="text-muted small">@item.ContactNumber</div>
+                                            </td>
+                                            <td>@item.PermitType</td>
+                                            <td>
+                                                @if (hasRequirements && requirementsByClient[item.Id].Any())
+                                                {
+                                                    var reqList = requirementsByClient[item.Id];
+                                                    var displayCount = reqList.Count > 2 ? 2 : reqList.Count;
+                                                    <div class="small">
+                                                        <span class="badge bg-secondary">@reqList.Count requirements</span>
+                                                        <ul class="list-unstyled mt-1 mb-0">
+                                                            @for (int i = 0; i < displayCount; i++)
+                                                            {
+                                                                <li>• @reqList[i].RequirementName</li>
+                                                            }
+                                                            @if (reqList.Count > 2)
+                                                            {
+                                                                <li>• <i>@(reqList.Count - 2) more...</i></li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                else if (!string.IsNullOrEmpty(item.Address))
+                                                {
+                                                    <div class="small">
+                                                        <span class="text-muted">Client Address:</span>
+                                                        <div class="text-truncate" style="max-width: 250px;">
+                                                            @item.Address
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">No requirements defined</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@item.Status</span>
+                                            </td>
+                                            <td>
+                                                @if (item.UrgencyLevel == "Urgent")
+                                                {
+                                                    <span class="badge bg-danger">Urgent</span>
+                                                }
+                                                else if (item.UrgencyLevel == "Slightly Urgent")
+                                                {
+                                                    <span class="badge bg-warning">Slightly Urgent</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Normal</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                @if (item.Status == "Planning")
+                                                {
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" data-bs-toggle="tooltip" title="View complete client information, contact details, and current requirements status.">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#backToFinanceModal-@item.Id" title="Return this client to Finance department. You must provide a note explaining the reason for this action.">
+                                                            <i class="bi bi-arrow-left-circle"></i>
+                                                        </button>
+                                                        <a asp-action="PlanRequirements" asp-route-id="@item.Id" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Plan, edit, or review permit requirements for this client. Add new requirements or modify existing ones.">
+                                                            <i class="bi bi-list-check"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#proceedToLiaisonModal-@item.Id" title="Complete planning phase and send this client to Customer Care for inspection. This action cannot be undone.">
+                                                            <i class="bi bi-check-lg"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="View client details.">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                }
+                                                <div class="modal fade" id="proceedToLiaisonModal-@item.Id" tabindex="-1">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Confirm Action</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @if (allRequirementsCompleted)
+                                                                {
+                                                                    <p>Are you sure you want to send <strong>@item.ClientName</strong> to Customer Care for inspection?</p>
+                                                                    <p class="text-muted small">This action will complete the planning phase and move the client to the next stage.</p>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="alert alert-warning" role="alert">
+                                                                        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Incomplete Requirements!</h4>
+                                                                        <p>
+                                                                            <strong>@item.ClientName</strong> has <strong>@(totalRequirements - completedRequirements)</strong> pending requirement(s) out of @totalRequirements.
+                                                                        </p>
+                                                                        <hr>
+                                                                        <p class="mb-0">Are you sure you want to proceed? The client will be sent to Liaison/Customer Care with incomplete requirements.</p>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <form asp-action="ProceedToLiaison" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                                                    @if (allRequirementsCompleted)
+                                                                    {
+                                                                        <button type="submit" class="btn btn-success">Proceed to Liaison</button>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <button type="submit" class="btn btn-warning">Proceed Anyway</button>
+                                                                    }
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal fade" id="backToFinanceModal-@item.Id" tabindex="-1" aria-labelledby="backToFinanceModalLabel-@item.Id" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <form asp-action="BackToFinance" asp-route-id="@item.Id" method="post">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="backToFinanceModalLabel-@item.Id">Return Client to Finance</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="mb-3">
+                                                                        <label for="note-@item.Id" class="form-label">Note (for reversibility):</label>
+                                                                        <textarea class="form-control" id="note-@item.Id" name="note" rows="3" required></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-warning" data-bs-toggle="tooltip" title="Return this client to Finance with your note.">Return to Finance</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info m-3">
+                            <i class="bi bi-info-circle"></i> No pending clients available.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-light">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            @{
+                                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+                                var currentAction = ViewData["CurrentAction"] as string;
+                            }
+                            <li class="page-item @prevDisabled">
+                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex - 1)" class="page-link">
+                                    &laquo; Previous
+                                </a>
+                            </li>
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">Page @Model.PageIndex of @Model.TotalPages</span>
+                            </li>
+                            <li class="page-item @nextDisabled">
+                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex + 1)" class="page-link">
+                                    Next &raquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

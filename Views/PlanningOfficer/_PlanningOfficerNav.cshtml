@@ -1,0 +1,37 @@
+@{
+    var action = ViewContext.RouteData.Values["Action"].ToString();
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Planning Officer Dashboard</h5>
+    </div>
+    <div class="card-body p-0">
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(action == "Index" ? "active" : "")" asp-controller="PlanningOfficer"
+                    asp-action="Index">
+                    <i class="bi bi-list-ul"></i> Planning Clients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(action.Contains("Requirement") ? "active" : "")" href="#" onclick="return false;"
+                    style="cursor: default;">
+                    <i class="bi bi-gear"></i> Requirements Management
+                </a>
+            </li>
+            <li class="nav-item ms-3">
+                <a class="nav-link @(action == "PlanningClients" ? "active" : "")" asp-controller="PlanningOfficer"
+                    asp-action="PlanningClients">
+                    <i class="bi bi-list-task"></i> Pending Clients
+                </a>
+            </li>
+            <li class="nav-item ms-3">
+                <a class="nav-link @(action == "CompletedClients" ? "active" : "")" asp-controller="PlanningOfficer"
+                    asp-action="CompletedClients">
+                    <i class="bi bi-check-circle"></i> Completed Clients
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+@model TestingDemo.Models.ClientModel
+
+@{
+    ViewData["Title"] = "Add New Client";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Clients</a></li>
+                    <li class="breadcrumb-item active">Add New</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-person-plus"></i> Add New Client</h2>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-plus"></i> Client Information</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Fill out the form and click 'Create' to add a new client. Hover over any
+                button to see what will happen before you click.</p>
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ClientName" class="control-label"></label>
+                            <input asp-for="ClientName" class="form-control" placeholder="Enter client name" />
+                            <span asp-validation-for="ClientName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PermitType" class="control-label"></label>
+                            <input asp-for="PermitType" class="form-control" placeholder="Enter permit type" />
+                            <span asp-validation-for="PermitType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ContactNumber" class="control-label"></label>
+                            <input asp-for="ContactNumber" class="form-control" placeholder="Enter contact number" />
+                            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="Enter email address" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="Address" class="control-label"></label>
+                            <textarea asp-for="Address" class="form-control" rows="3"
+                                placeholder="Enter client address"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Bookkeeping Information (Optional) -->
+                    <div class="col-md-12 mt-3">
+                        <h6 class="text-muted">Optional Financial Information</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TaxId" class="control-label"></label>
+                            <input asp-for="TaxId" class="form-control" placeholder="Enter tax ID/number (optional)" />
+                            <span asp-validation-for="TaxId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="FinancialYear" class="control-label"></label>
+                            <input asp-for="FinancialYear" class="form-control"
+                                placeholder="Enter financial year (optional)" />
+                            <span asp-validation-for="FinancialYear" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="FinancialNotes" class="control-label"></label>
+                            <textarea asp-for="FinancialNotes" class="form-control" rows="3"
+                                placeholder="Enter any financial notes or special instructions (optional)"></textarea>
+                            <span asp-validation-for="FinancialNotes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="DocumentReferences" class="control-label"></label>
+                            <textarea asp-for="DocumentReferences" class="form-control" rows="2"
+                                placeholder="List any document references or file locations (optional)"></textarea>
+                            <span asp-validation-for="DocumentReferences" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="UrgencyLevel" class="control-label mb-2"></label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="UrgencyLevel" id="urgencyNormal"
+                                    value="Normal" checked>
+                                <label class="form-check-label" for="urgencyNormal">
+                                    <span class="badge bg-success">Normal</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="UrgencyLevel" id="urgencySlightly"
+                                    value="Slightly Urgent">
+                                <label class="form-check-label" for="urgencySlightly">
+                                    <span class="badge bg-warning text-dark">Slightly Urgent</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="UrgencyLevel" id="urgencyUrgent"
+                                    value="Urgent">
+                                <label class="form-check-label" for="urgencyUrgent">
+                                    <span class="badge bg-danger">Urgent</span>
+                                </label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="UrgencyLevel" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip"
+                            title="Create a new client with the entered information.">
+                            <i class="bi bi-save"></i> Save Client
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                            title="Cancel and return to the client list. No client will be created.">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
