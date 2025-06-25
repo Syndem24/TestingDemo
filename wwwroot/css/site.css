@@ -1,5 +1,8 @@
+/* Root HTML settings */
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -8,15 +11,252 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Main Dashboard Container */
+.dashboard-container {
+  width: 100vw;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    "liaison finance received"
+    "liaison planning documentation";
+  gap: 20px;
+}
+
+/* Grid Item Base */
+.dashboard-grid-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 240px;
+}
+
+/* Individual Area Heights */
+.dashboard-liaison {
+  grid-area: liaison;
+  min-height: 500px;
+}
+
+.dashboard-finance {
+  grid-area: finance;
+}
+
+.dashboard-received {
+  grid-area: received;
+}
+
+.dashboard-planning {
+  grid-area: planning;
+}
+
+.dashboard-documentation {
+  grid-area: documentation;
+}
+
+/* Hover effect */
+.dashboard-grid-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  transition: 0.2s ease-in-out;
+}
+
+/* Title */
+.dashboard-title {
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 12px 0;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+
+/* Table Styling */
+.dashboard-table {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.dashboard-table thead {
+  background-color: #e9ecef;
+  flex-shrink: 0;
+}
+
+.dashboard-table th {
+  padding: 8px 12px;
+  background-color: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  border: 1px solid #dee2e6;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dashboard-table tbody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: block;
+}
+
+.dashboard-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.dashboard-table td {
+  padding: 8px 12px;
+  background-color: #ffffff;
+  color: #212529;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.dashboard-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.dashboard-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.dashboard-table tbody tr:nth-child(even):hover {
+  background-color: #e9ecef;
+}
+
+/* Column Widths */
+.dashboard-table th:nth-child(1),
+.dashboard-table td:nth-child(1) {
+  width: 35%;
+}
+
+.dashboard-table th:nth-child(2),
+.dashboard-table td:nth-child(2) {
+  width: 35%;
+}
+
+.dashboard-table th:nth-child(3),
+.dashboard-table td:nth-child(3) {
+  width: 30%;
+}
+
+/* Scrollbar */
+.dashboard-table tbody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-table tbody::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dashboard-table tbody::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.dashboard-table tbody::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Responsive Layout */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "liaison liaison"
+      "finance received"
+      "planning documentation";
+  }
+
+  .dashboard-liaison {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "liaison"
+      "finance"
+      "received"
+      "planning"
+      "documentation";
+  }
+
+  .dashboard-grid-item {
+    min-height: 250px;
+  }
+
+  .dashboard-title {
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-title {
+    font-size: 0.9rem;
+    padding: 8px 0;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+
+  .dashboard-table th:nth-child(3),
+  .dashboard-table td:nth-child(3) {
+    display: none;
+  }
+
+  .dashboard-table th:nth-child(1),
+  .dashboard-table td:nth-child(1),
+  .dashboard-table th:nth-child(2),
+  .dashboard-table td:nth-child(2) {
+    width: 50%;
+  }
+}
+
+/* No Data Message */
+.no-data {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
 }

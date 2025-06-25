@@ -44,7 +44,18 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     }
 
     <!-- Pending Applications -->
@@ -56,21 +67,30 @@
         <div class="card-body p-0">
             @if (Model.PendingClients.Any())
             {
-                @await Html.PartialAsync("_ClientTable", Model.PendingClients, new ViewDataDictionary(ViewData) { { "IsClearanceTable", false } })
-            }
-            else
+            @await Html.PartialAsync("_ClientTable", Model.PendingClients, new ViewDataDictionary(ViewData) {
+            ["IsClearanceTable"] = false })
+                        }
+                        else
             {
                 <div class="text-center p-4">
-                    <p class="text-muted">No pending applications.</p>
+                    <div class="mb-3">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #6c757d;"></i>
+                    </div>
+                    <p class="text-muted mb-0">No pending applications found.</p>
+                    <small class="text-muted">New applications will appear here once submitted.</small>
                 </div>
             }
         </div>
         @if (Model.PendingClients.TotalPages > 1)
         {
-            <div class="card-footer">
-                @await Html.PartialAsync("_Pagination", new ViewDataDictionary(ViewData) { { "pageModel",
-                Model.PendingClients }, { "pageAction", "Index" }, { "pageNumberParam", "pendingPageNumber" }, {
-                "otherPageNumberParam", "clearancePageNumber" }, { "otherPageNumber", Model.ClearanceClients.PageIndex } })
+        <div class="card-footer">
+            @await Html.PartialAsync("_Pagination", null, new ViewDataDictionary(ViewData) {
+            ["pageModel"] = Model.PendingClients,
+                        ["pageAction"] = "Index",
+                        ["pageNumberParam"] = "pendingPageNumber",
+                        ["otherPageNumberParam"] = "clearancePageNumber",
+                        ["otherPageNumber"] = Model.ClearanceClients.PageIndex
+                        })
         </div>
                 }
     </div>
@@ -84,62 +104,104 @@
         <div class="card-body p-0">
             @if (Model.ClearanceClients.Any())
             {
-                @await Html.PartialAsync("_ClientTable", Model.ClearanceClients, new ViewDataDictionary(ViewData) { { "IsClearanceTable", true } })
-            }
-            else
+            @await Html.PartialAsync("_ClientTable", Model.ClearanceClients, new ViewDataDictionary(ViewData) {
+            ["IsClearanceTable"] = true })
+                        }
+                        else
             {
                 <div class="text-center p-4">
-                    <p class="text-muted">No clients currently needing finance clearance.</p>
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle" style="font-size: 3rem; color: #28a745;"></i>
+                    </div>
+                    <p class="text-muted mb-0">No clients currently need finance clearance.</p>
+                    <small class="text-muted">Clients requiring financial review will appear here.</small>
                 </div>
             }
         </div>
         @if (Model.ClearanceClients.TotalPages > 1)
         {
-            <div class="card-footer">
-                @await Html.PartialAsync("_Pagination", new ViewDataDictionary(ViewData) { { "pageModel",
-                Model.ClearanceClients }, { "pageAction", "Index" }, { "pageNumberParam", "clearancePageNumber" }, {
-                "otherPageNumberParam", "pendingPageNumber" }, { "otherPageNumber", Model.PendingClients.PageIndex } })
+        <div class="card-footer">
+            @await Html.PartialAsync("_Pagination", null, new ViewDataDictionary(ViewData) {
+            ["pageModel"] = Model.ClearanceClients,
+                        ["pageAction"] = "Index",
+                        ["pageNumberParam"] = "clearancePageNumber",
+                        ["otherPageNumberParam"] = "pendingPageNumber",
+                        ["otherPageNumber"] = Model.PendingClients.PageIndex
+                        })
         </div>
                 }
     </div>
 </div>
 
-<!--Modals-->
-<div class="modal fade" id="sendToPlanningModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modals -->
+<div class="modal fade" id="sendToPlanningModal" tabindex="-1" aria-labelledby="sendToPlanningModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="sendToPlanningModalLabel">
+                    <i class="bi bi-send-check"></i> Confirm Action
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to send client <strong id="clientNamePlaceholder"></strong> to the Planning
-                Officer?
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-question-circle-fill text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <div>
+                        <p class="mb-1">Are you sure you want to send client <strong
+                                id="clientNamePlaceholder"></strong> to the Planning Officer?</p>
+                        <small class="text-muted">This action will move the client to the planning stage.</small>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="sendToPlanningForm" method="post">
-                    <button type="submit" class="btn btn-success">Confirm & Send</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <form id="sendToPlanningForm" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-send-check"></i> Confirm & Send
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="archiveModal" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Archive</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="archiveModalLabel">
+                    <i class="bi bi-archive"></i> Confirm Archive
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to archive client <strong id="archiveClientName"></strong>? This action cannot be easily undone.
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                    <div>
+                        <p class="mb-1">Are you sure you want to archive client <strong
+                                id="archiveClientName"></strong>?</p>
+                        <small class="text-muted">This action cannot be easily undone and will remove the client from
+                            active lists.</small>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="archiveForm" method="post">
-                    <button type="submit" class="btn btn-danger">Archive Client</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <form id="archiveForm" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-archive"></i> Archive Client
+                    </button>
                 </form>
             </div>
         </div>
@@ -149,38 +211,66 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var sendModal = document.getElementById('sendToPlanningModal');
-            sendModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var clientId = button.getAttribute('data-client-id');
-                var clientName = button.getAttribute('data-client-name');
-
-                var modalText = sendModal.querySelector('.modal-body strong');
-                modalText.textContent = clientName;
-
-                var form = sendModal.querySelector('#sendToPlanningForm');
-                form.action = '/Finance/SendToPlanningOfficer/' + clientId;
-            });
-
-            var archiveModal = document.getElementById('archiveModal');
-            archiveModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var clientId = button.getAttribute('data-client-id');
-                var clientName = button.getAttribute('data-client-name');
-                
-                var modalText = archiveModal.querySelector('#archiveClientName');
-                modalText.textContent = clientName;
-
-                var form = archiveModal.querySelector('#archiveForm');
-                form.action = '/Finance/ArchiveClient/' + clientId;
-            });
-
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Send to Planning Modal
+            var sendModal = document.getElementById('sendToPlanningModal');
+            if (sendModal) {
+                sendModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var clientId = button.getAttribute('data-client-id');
+                    var clientName = button.getAttribute('data-client-name');
+
+                    if (clientId && clientName) {
+                        var modalText = sendModal.querySelector('#clientNamePlaceholder');
+                        if (modalText) {
+                            modalText.textContent = clientName;
+                        }
+
+                        var form = sendModal.querySelector('#sendToPlanningForm');
+                        if (form) {
+                            form.action = '/Finance/SendToPlanningOfficer/' + clientId;
+                        }
+                    }
+                });
+            }
+
+            // Archive Modal
+            var archiveModal = document.getElementById('archiveModal');
+            if (archiveModal) {
+                archiveModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var clientId = button.getAttribute('data-client-id');
+                    var clientName = button.getAttribute('data-client-name');
+
+                    if (clientId && clientName) {
+                        var modalText = archiveModal.querySelector('#archiveClientName');
+                        if (modalText) {
+                            modalText.textContent = clientName;
+                        }
+
+                        var form = archiveModal.querySelector('#archiveForm');
+                        if (form) {
+                            form.action = '/Finance/ArchiveClient/' + clientId;
+                        }
+                    }
+                });
+            }
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach(function (alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
         });
     </script>
 }
 
-@* I will create the _ClientTable partial view next to avoid code duplication *@
+@* The _ClientTable partial view should be created separately to handle the client data display *@
