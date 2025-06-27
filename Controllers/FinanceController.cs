@@ -100,12 +100,6 @@ namespace TestingDemo.Controllers
             // Clear validation errors for nullable fields if they're empty
             if (string.IsNullOrEmpty(client.TaxId))
                 ModelState.Remove("TaxId");
-            if (string.IsNullOrEmpty(client.FinancialYear))
-                ModelState.Remove("FinancialYear");
-            if (string.IsNullOrEmpty(client.FinancialNotes))
-                ModelState.Remove("FinancialNotes");
-            if (string.IsNullOrEmpty(client.DocumentReferences))
-                ModelState.Remove("DocumentReferences");
 
             if (ModelState.IsValid)
             {
@@ -151,12 +145,6 @@ namespace TestingDemo.Controllers
             // Clear validation errors for nullable fields if they're empty
             if (string.IsNullOrEmpty(client.TaxId))
                 ModelState.Remove("TaxId");
-            if (string.IsNullOrEmpty(client.FinancialYear))
-                ModelState.Remove("FinancialYear");
-            if (string.IsNullOrEmpty(client.FinancialNotes))
-                ModelState.Remove("FinancialNotes");
-            if (string.IsNullOrEmpty(client.DocumentReferences))
-                ModelState.Remove("DocumentReferences");
 
             if (ModelState.IsValid)
             {
