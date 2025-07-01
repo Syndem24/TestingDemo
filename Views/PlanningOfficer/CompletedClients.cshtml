@@ -41,8 +41,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>@Html.DisplayNameFor(model => model.ClientName)</th>
-                                        <th>@Html.DisplayNameFor(model => model.ContactNumber)</th>
-                                        <th>@Html.DisplayNameFor(model => model.PermitType)</th>
+                                        <th>@Html.DisplayNameFor(model => model.ContactPersonNumber)</th>
+                                        <th>@Html.DisplayNameFor(model => model.TypeOfProject)</th>
                                         <th>@Html.DisplayNameFor(model => model.UrgencyLevel)</th>
                                         <th>@Html.DisplayNameFor(model => model.Status)</th>
                                         <th>Actions</th>
@@ -53,8 +53,8 @@
                                     {
                                         <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
                                             <td>@Html.DisplayFor(modelItem => item.ClientName)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.ContactNumber)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.PermitType)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.ContactPersonNumber)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.TypeOfProject)</td>
                                             <td>
                                                 @if (item.UrgencyLevel == "Urgent")
                                                 {

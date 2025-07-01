@@ -99,6 +99,10 @@ namespace TestingDemo.Controllers
             }
 
             var client = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (client == null)
@@ -122,7 +126,12 @@ namespace TestingDemo.Controllers
                 return NotFound();
             }
 
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .FirstOrDefaultAsync(c => c.Id == id);
             if (client == null)
             {
                 return NotFound();

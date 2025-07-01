@@ -107,13 +107,14 @@
                                         <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
                                         <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i class="bi bi-folder-check"></i> Document Officer</a></li>
                                         <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i class="bi bi-clipboard-check"></i> Planning Officer</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Task" asp-action="Analytics"><i class="bi bi-bar-chart"></i> Analytics</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i class="bi bi-bar-chart"></i> Analytics</a></li>
                                         <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i class="bi bi-archive-fill"></i> Archive</a></li>
                                     }
                                     else if (User.IsInRole("Finance"))
                                     {
                                         <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
                                         <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i class="bi bi-bar-chart"></i> Analytics</a></li>
                                     }
                                     else if (User.IsInRole("DocumentOfficer"))
                                     {

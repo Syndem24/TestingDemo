@@ -63,8 +63,8 @@
                                         <div class="fw-medium">@item.ClientName</div>
                                         <div class="text-muted small">@item.Email</div>
                                     </td>
-                                    <td>@item.ContactNumber</td>
-                                    <td>@item.PermitType</td>
+                                    <td>@item.ContactPersonNumber</td>
+                                    <td>@item.TypeOfProject</td>
                                     <td>
                                         <span class="badge @(item.Status == "Finance" ? "bg-primary" : "bg-secondary")">@item.Status</span>
                                         @if (!string.IsNullOrEmpty(item.PlanningReturnNote))

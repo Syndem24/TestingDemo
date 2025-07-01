@@ -40,8 +40,8 @@ namespace TestingDemo.Controllers
             // Apply searching
             if (!String.IsNullOrEmpty(searchString))
             {
-                liaisonQuery = liaisonQuery.Where(s => s.ClientName.Contains(searchString) || s.PermitType.Contains(searchString));
-                receivedQuery = receivedQuery.Where(s => s.ClientName.Contains(searchString) || s.PermitType.Contains(searchString));
+                liaisonQuery = liaisonQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+                receivedQuery = receivedQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
             }
 
             // Apply sorting
@@ -79,7 +79,12 @@ namespace TestingDemo.Controllers
         {
             if (id == null)
                 return NotFound();
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .FirstOrDefaultAsync(c => c.Id == id);
             if (client == null)
                 return NotFound();
             var requirements = await _context.PermitRequirements.Where(r => r.ClientId == id).ToListAsync();

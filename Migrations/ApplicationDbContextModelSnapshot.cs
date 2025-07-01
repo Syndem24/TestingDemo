@@ -303,40 +303,65 @@ namespace TestingDemo.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ClientName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ContactNumber")
+                    b.Property<string>("ClientType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPersonEmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPersonNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DocumentReferences")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FinancialNotes")
+                    b.Property<int?>("ExternalAuditId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OneTimeTransactionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OtherRequestingParty")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FinancialYear")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PermitType")
-                        .IsRequired()
+                    b.Property<string>("OtherTypeOfProject")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PlanningReturnNote")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegisteredCompanyAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegisteredCompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestingParty")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RetainershipBIRId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RetainershipSPPId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -345,13 +370,72 @@ namespace TestingDemo.Migrations
                     b.Property<string>("TaxId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TypeOfProject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UrgencyLevel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExternalAuditId");
+
+                    b.HasIndex("OneTimeTransactionId");
+
+                    b.HasIndex("RetainershipBIRId");
+
+                    b.HasIndex("RetainershipSPPId");
+
                     b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.ExternalAuditModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ExternalAuditOtherPurpose")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalAuditPurposes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExternalAuditReportDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalAuditStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalAudits");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.OneTimeTransactionModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AreaOfServices")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherAreaOfServices")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TypeOfRegistrant")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OneTimeTransactions");
                 });
 
             modelBuilder.Entity("TestingDemo.Models.PermitRequirementModel", b =>
@@ -390,6 +474,104 @@ namespace TestingDemo.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("PermitRequirements");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.RetainershipBIRModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BIRCertificateUploadPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BIRComplianceActivities")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BIRRdoNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("BIRRetainershipStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CatchUpReasons")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CatchUpStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateBIRRegistration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateOCNGenerated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NeedCatchUpAccounting")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OCNNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherBIRCompliance")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherBirRdoNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherCatchUpReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxFilingStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TypeOfRegistrant")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RetainershipBIRs");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.RetainershipSPPModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HDMFCompanyRegNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HDMFRegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OtherSPPCompliance")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PHICCompanyRegNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PHICRegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SPPComplianceActivities")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SPPRetainershipStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SSSCompanyRegNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SSSRegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RetainershipSPPs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -441,6 +623,33 @@ namespace TestingDemo.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.ClientModel", b =>
+                {
+                    b.HasOne("TestingDemo.Models.ExternalAuditModel", "ExternalAudit")
+                        .WithMany()
+                        .HasForeignKey("ExternalAuditId");
+
+                    b.HasOne("TestingDemo.Models.OneTimeTransactionModel", "OneTimeTransaction")
+                        .WithMany()
+                        .HasForeignKey("OneTimeTransactionId");
+
+                    b.HasOne("TestingDemo.Models.RetainershipBIRModel", "RetainershipBIR")
+                        .WithMany()
+                        .HasForeignKey("RetainershipBIRId");
+
+                    b.HasOne("TestingDemo.Models.RetainershipSPPModel", "RetainershipSPP")
+                        .WithMany()
+                        .HasForeignKey("RetainershipSPPId");
+
+                    b.Navigation("ExternalAudit");
+
+                    b.Navigation("OneTimeTransaction");
+
+                    b.Navigation("RetainershipBIR");
+
+                    b.Navigation("RetainershipSPP");
                 });
 
             modelBuilder.Entity("TestingDemo.Models.PermitRequirementModel", b =>

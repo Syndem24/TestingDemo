@@ -8,17 +8,57 @@
 <div class="container-fluid">
     <h2 class="mb-4"><i class="bi bi-archive-fill"></i> @ViewData["Title"]</h2>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filter Clients</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label mb-1">Client Name</label>
+                    <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]"
+                        class="form-control form-control-sm" placeholder="Find by name...">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label mb-1">Permit Type</label>
+                    @{
+                        var typeOfProject = Context.Request.Query["TypeOfProject"].ToString();
+                        var projectTypes = new[] { "Retainership - BIR", "Retainership - SPP", "One Time Transaction",
+                                        "External Audit", "Other" };
+                        var optionsString = "<option value=''>All Types</option>";
+                        foreach (var type in projectTypes)
+                        {
+                            var selected = typeOfProject == type ? " selected='selected'" : "";
+                            optionsString += $"<option value='{type}'{selected}>{type}</option>";
+                        }
+                    }
+                    <select name="TypeOfProject" class="form-select form-select-sm">
+                        @Html.Raw(optionsString)
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label mb-1">Date From</label>
+                    <input type="date" name="CreatedDateFrom" value="@Context.Request.Query["CreatedDateFrom"]"
+                        class="form-control form-control-sm">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label mb-1">Date To</label>
+                    <input type="date" name="CreatedDateTo" value="@Context.Request.Query["CreatedDateTo"]"
+                        class="form-control form-control-sm">
+                </div>
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i>
+                        Filter</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm w-100">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-light py-2">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-muted"><i class="bi bi-clock-history"></i> Archived Client History</h5>
-                <form asp-action="Index" method="get" class="d-flex align-items-center">
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control"
-                            placeholder="Find by name...">
-                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
-                    </div>
-                </form>
             </div>
         </div>
         <div class="card-body p-0">
@@ -31,9 +71,12 @@
                                 <th><a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
                                         asp-route-currentFilter="@ViewData["CurrentFilter"]">Client</a></th>
                                 <th>Contact</th>
-                                <th>Permit Type</th>
+                                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["TypeSortParm"]"
+                                        asp-route-currentFilter="@ViewData["CurrentFilter"]">Permit Type</a></th>
                                 <th><a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]"
                                         asp-route-currentFilter="@ViewData["CurrentFilter"]">Archived Date</a></th>
+                                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["StatusSortParm"]"
+                                        asp-route-currentFilter="@ViewData["CurrentFilter"]">Status</a></th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -42,9 +85,10 @@
                             {
                                 <tr>
                                     <td>@item.ClientName</td>
-                                    <td>@item.ContactNumber</td>
-                                    <td>@item.PermitType</td>
+                                    <td>@item.ContactPersonNumber</td>
+                                    <td>@item.TypeOfProject</td>
                                     <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@item.Status</td>
                                     <td class="text-center">
                                         <a asp-controller="Archive" asp-action="Details" asp-route-id="@item.Id"
                                             class="btn btn-outline-info btn-sm" title="View Details"><i

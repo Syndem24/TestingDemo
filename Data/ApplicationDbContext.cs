@@ -31,6 +31,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<PermitRequirementModel> PermitRequirements { get; set; }
 
+    public DbSet<RetainershipBIRModel> RetainershipBIRs { get; set; }
+    public DbSet<RetainershipSPPModel> RetainershipSPPs { get; set; }
+    public DbSet<OneTimeTransactionModel> OneTimeTransactions { get; set; }
+    public DbSet<ExternalAuditModel> ExternalAudits { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

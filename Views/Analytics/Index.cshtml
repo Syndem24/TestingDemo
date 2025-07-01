@@ -1,0 +1,330 @@
+@model TestingDemo.ViewModels.AnalyticsViewModel
+@{
+    ViewData["Title"] = "Analytics Dashboard";
+}
+<div class="container py-4">
+    <h2 class="mb-4"><i class="bi bi-bar-chart"></i> Analytics Dashboard</h2>
+    <!-- Filter Dropdown Button -->
+    <div class="mb-3">
+        <button class="btn btn-outline-primary d-inline-flex align-items-center" type="button" data-bs-toggle="collapse"
+            data-bs-target="#analyticsFilterCollapse" aria-expanded="false" aria-controls="analyticsFilterCollapse">
+            <i class="bi bi-funnel me-1"></i> Show Filters
+        </button>
+    </div>
+    <div class="collapse d-lg-block" id="analyticsFilterCollapse">
+        <form class="row row-cols-1 row-cols-md-4 g-2 mb-4 align-items-end" method="get" asp-action="Index"
+            asp-controller="Analytics">
+            <div class="col">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control form-control-sm" id="startDate" name="startDate"
+                    value="@Context.Request.Query["startDate"]">
+            </div>
+            <div class="col">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control form-control-sm" id="endDate" name="endDate"
+                    value="@Context.Request.Query["endDate"]">
+            </div>
+            <div class="col">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select form-select-sm" id="status" name="status">
+                    <option value="">All</option>
+                    @foreach (var s in Model.AllStatuses ?? new List<string>())
+                    {
+                        @if (Context.Request.Query["status"] == s)
+                        {
+                            <option value="@s" selected>@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <label for="projectType" class="form-label">Project Type</label>
+                <select class="form-select form-select-sm" id="projectType" name="projectType">
+                    <option value="">All</option>
+                    @foreach (var type in Model.AllProjectTypes ?? new List<string>())
+                    {
+                        @if (Context.Request.Query["projectType"] == type)
+                        {
+                            <option value="@type" selected>@type</option>
+                        }
+                        else
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <label for="urgency" class="form-label">Urgency</label>
+                <select class="form-select form-select-sm" id="urgency" name="urgency">
+                    <option value="">All</option>
+                    @foreach (var u in Model.AllUrgencies ?? new List<string>())
+                    {
+                        @if (Context.Request.Query["urgency"] == u)
+                        {
+                            <option value="@u" selected>@u</option>
+                        }
+                        else
+                        {
+                            <option value="@u">@u</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <label for="supplierName" class="form-label">Supplier Name</label>
+                <input type="text" class="form-control form-control-sm" id="supplierName" name="supplierName"
+                    value="@Context.Request.Query["supplierName"]">
+            </div>
+            <div class="col">
+                <label for="businessType" class="form-label">Business Type</label>
+                <input type="text" class="form-control form-control-sm" id="businessType" name="businessType"
+                    value="@Context.Request.Query["businessType"]">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clients</h5>
+                    <h2 class="card-text">@Model.TotalClients</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Permit Completion Rate</h5>
+                    <h2 class="card-text">@Model.PermitCompletionRate.ToString("F1")% </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Most Common Status</h5>
+                    <h2 class="card-text">@Model.ClientsByStatus.OrderByDescending(x => x.Value).FirstOrDefault().Key
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Most Common Project Type</h5>
+                    <h2 class="card-text">@Model.ClientsByType.OrderByDescending(x => x.Value).FirstOrDefault().Key</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-secondary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Vendors</h5>
+                    <h2 class="card-text">@Model.TotalVendors</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Approved Vendors</h5>
+                    <h2 class="card-text">@Model.ApprovedVendors</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total External Audits</h5>
+                    <h2 class="card-text">@Model.TotalExternalAudits</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">External Audit Completion Rate</h5>
+                    <h2 class="card-text">@Model.ExternalAuditCompletionRate.ToString("F1")% </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Clients by Status</div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Clients by Project Type</div>
+                <div class="card-body">
+                    <canvas id="typeChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Clients by Urgency</div>
+                <div class="card-body">
+                    <canvas id="urgencyChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-light fw-bold">Monthly Client Trends</div>
+        <div class="card-body">
+            <canvas id="monthlyChart" height="100"></canvas>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Urgent Requests Trend</div>
+                <div class="card-body">
+                    <canvas id="urgentTrendChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Forecast: Next Month's Projects</div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <h1 class="display-4">@Model.ForecastNextMonthProjects</h1>
+                    <div class="text-muted">(Predicted)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Requests Heatmap</div>
+                <div class="card-body">
+                    <canvas id="heatmapChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Approval Funnel / Conversion Rate</div>
+                <div class="card-body">
+                    <canvas id="approvalFunnelChart" height="200"></canvas>
+                    <div class="mt-3">
+                        <span class="me-3">Submitted→In Progress: <b>@Model.ApprovalFunnelRates["Submitted→In Progress"].ToString("F1")%</b></span>
+                        <span>In Progress→Approved: <b>@Model.ApprovalFunnelRates["In Progress→Approved"].ToString("F1")%</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 text-bg-info">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <h5 class="card-title">Client Repeat Rate (last 6 months)</h5>
+                    <h1 class="display-4">@Model.ClientRepeatRate</h1>
+                    <div class="text-muted">Clients with >1 request</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Upcoming External Audit Deadlines</div>
+                <div class="card-body">
+                    <canvas id="auditDeadlineTimeline" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light fw-bold">Projects by Client Type & Status</div>
+                <div class="card-body">
+                    <canvas id="stackedClientTypeStatusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Export/Report Buttons -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <form method="get" asp-action="ExportExcel" asp-controller="Analytics">
+            @* Hidden fields for filters *@
+            <input type="hidden" name="startDate" value="@Context.Request.Query["startDate"]" />
+            <input type="hidden" name="endDate" value="@Context.Request.Query["endDate"]" />
+            <input type="hidden" name="status" value="@Context.Request.Query["status"]" />
+            <input type="hidden" name="projectType" value="@Context.Request.Query["projectType"]" />
+            <input type="hidden" name="urgency" value="@Context.Request.Query["urgency"]" />
+            <input type="hidden" name="supplierName" value="@Context.Request.Query["supplierName"]" />
+            <input type="hidden" name="businessType" value="@Context.Request.Query["businessType"]" />
+            <button type="submit" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export to
+                Excel</button>
+        </form>
+        <form method="get" asp-action="ExportPdf" asp-controller="Analytics">
+            <input type="hidden" name="startDate" value="@Context.Request.Query["startDate"]" />
+            <input type="hidden" name="endDate" value="@Context.Request.Query["endDate"]" />
+            <input type="hidden" name="status" value="@Context.Request.Query["status"]" />
+            <input type="hidden" name="projectType" value="@Context.Request.Query["projectType"]" />
+            <input type="hidden" name="urgency" value="@Context.Request.Query["urgency"]" />
+            <input type="hidden" name="supplierName" value="@Context.Request.Query["supplierName"]" />
+            <input type="hidden" name="businessType" value="@Context.Request.Query["businessType"]" />
+            <button type="submit" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Export to PDF</button>
+        </form>
+        <form method="get" asp-action="MonthlyReport" asp-controller="Analytics">
+            <input type="hidden" name="month" value="@DateTime.Now.ToString("yyyy-MM")" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-calendar3"></i> Generate Monthly
+                Report</button>
+        </form>
+    </div>
+    <!-- Drill-down Filter Feedback -->
+    <div id="drilldown-active-filter" class="alert alert-info d-none mb-2"></div>
+    <!-- Hidden JSON for all filtered clients -->
+    <script id="filteredClientsJson" type="application/json">
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FilteredClients ?? new List<TestingDemo.Models.ClientModel>()))
+    </script>
+    <!-- Drill-down Table Section -->
+    <div class="card mt-4">
+        <div class="card-header bg-light fw-bold">Filtered Client Details</div>
+        <div class="card-body p-0 table-responsive">
+            <div id="drilldown-table-container"></div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Pass data to JS for external file
+        window.analyticsData = {
+            statusLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByStatus.Keys)),
+            statusData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByStatus.Values)),
+            typeLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByType.Keys)),
+            typeData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByType.Values)),
+            urgencyLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByUrgency.Keys)),
+            urgencyData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByUrgency.Values)),
+            monthLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByMonth.Keys)),
+            monthData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByMonth.Values)),
+            urgentTrendLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.UrgentRequestsTrend != null ? Model.UrgentRequestsTrend.Keys.ToList() : new List<string>()))),
+            urgentTrendData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.UrgentRequestsTrend != null ? Model.UrgentRequestsTrend.Values.ToList() : new List<int>()))),
+            heatmapLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRequestCounts?.Select(x => x.Date.ToString("yyyy-MM-dd")) ?? new List<string>())),
+            heatmapData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRequestCounts?.Select(x => x.Count) ?? new List<int>()))
+                                    };
+        window.analyticsData = Object.assign(window.analyticsData || {}, {
+            approvalFunnelLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ApprovalFunnelCounts?.Keys?.ToList() ?? new List<string>())),
+            approvalFunnelData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ApprovalFunnelCounts?.Values?.ToList() ?? new List<int>())),
+        });
+    </script>
+    <script src="~/js/analytics-charts.js"></script>
+}

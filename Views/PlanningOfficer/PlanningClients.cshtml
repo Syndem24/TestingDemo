@@ -88,9 +88,9 @@
                                         <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
                                             <td>
                                                 <div class="fw-medium">@item.ClientName</div>
-                                                <div class="text-muted small">@item.ContactNumber</div>
+                                                <div class="text-muted small">@item.ContactPersonNumber</div>
                                             </td>
-                                            <td>@item.PermitType</td>
+                                            <td>@item.TypeOfProject</td>
                                             <td>
                                                 @if (hasRequirements && requirementsByClient[item.Id].Any())
                                                 {
@@ -110,12 +110,12 @@
                                                         </ul>
                                                     </div>
                                                 }
-                                                else if (!string.IsNullOrEmpty(item.Address))
+                                                else if (!string.IsNullOrEmpty(item.RegisteredCompanyAddress))
                                                 {
                                                     <div class="small">
                                                         <span class="text-muted">Client Address:</span>
                                                         <div class="text-truncate" style="max-width: 250px;">
-                                                            @item.Address
+                                                            @item.RegisteredCompanyAddress
                                                         </div>
                                                     </div>
                                                 }

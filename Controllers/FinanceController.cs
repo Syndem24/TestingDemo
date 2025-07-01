@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TestingDemo.Models;
 using TestingDemo.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace TestingDemo.Controllers
 {
@@ -34,8 +35,8 @@ namespace TestingDemo.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                pendingQuery = pendingQuery.Where(s => s.ClientName.Contains(searchString) || s.PermitType.Contains(searchString));
-                clearanceQuery = clearanceQuery.Where(s => s.ClientName.Contains(searchString) || s.PermitType.Contains(searchString));
+                pendingQuery = pendingQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+                clearanceQuery = clearanceQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
             }
 
             switch (sortOrder)
@@ -76,6 +77,10 @@ namespace TestingDemo.Controllers
             }
 
             var client = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (client == null)
@@ -97,9 +102,90 @@ namespace TestingDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClientModel client)
         {
-            // Clear validation errors for nullable fields if they're empty
+            // Debug: capture all posted form keys and values
+            ViewBag.PostedForm = Request.Form.Keys.ToDictionary(k => k, k => Request.Form[k]);
+
             if (string.IsNullOrEmpty(client.TaxId))
                 ModelState.Remove("TaxId");
+
+            // Bind project-type-specific data
+            switch (client.TypeOfProject)
+            {
+                case "Retainership - BIR":
+                    var bir = new RetainershipBIRModel
+                    {
+                        TypeOfRegistrant = Request.Form["RetainershipBIR.TypeOfRegistrant"],
+                        OCNNotes = Request.Form["RetainershipBIR.OCNNotes"],
+                        DateOCNGenerated = DateTime.TryParse(Request.Form["RetainershipBIR.DateOCNGenerated"], out var docn) ? docn : (DateTime?)null,
+                        DateBIRRegistration = DateTime.TryParse(Request.Form["RetainershipBIR.DateBIRRegistration"], out var dreg) ? dreg : (DateTime?)null,
+                        BIRRdoNo = Request.Form["RetainershipBIR.BIRRdoNo"],
+                        OtherBirRdoNo = Request.Form["RetainershipBIR.OtherBirRdoNo"],
+                        TaxFilingStatus = Request.Form["RetainershipBIR.TaxFilingStatus"],
+                        NeedCatchUpAccounting = Request.Form["RetainershipBIR.NeedCatchUpAccounting"],
+                        CatchUpReasons = Request.Form["RetainershipBIR.CatchUpReasons"],
+                        OtherCatchUpReason = Request.Form["RetainershipBIR.OtherCatchUpReason"],
+                        CatchUpStartDate = DateTime.TryParse(Request.Form["RetainershipBIR.CatchUpStartDate"], out var dcu) ? dcu : (DateTime?)null,
+                        BIRComplianceActivities = Request.Form["RetainershipBIR.BIRComplianceActivities"],
+                        OtherBIRCompliance = Request.Form["RetainershipBIR.OtherBIRCompliance"],
+                        BIRRetainershipStartDate = DateTime.TryParse(Request.Form["RetainershipBIR.BIRRetainershipStartDate"], out var drs) ? drs : (DateTime?)null
+                    };
+                    if (string.IsNullOrWhiteSpace(bir.BIRRdoNo))
+                    {
+                        ModelState.AddModelError("RetainershipBIR.BIRRdoNo", "BIR RDO No. is required.");
+                    }
+                    client.RetainershipBIR = bir;
+                    client.RetainershipSPP = null;
+                    client.OneTimeTransaction = null;
+                    client.ExternalAudit = null;
+                    break;
+                case "Retainership - SPP":
+                    var spp = new RetainershipSPPModel
+                    {
+                        SSSCompanyRegNo = Request.Form["RetainershipSPP.SSSCompanyRegNo"],
+                        SSSRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.SSSRegistrationDate"], out var dsss) ? dsss : (DateTime?)null,
+                        PHICCompanyRegNo = Request.Form["RetainershipSPP.PHICCompanyRegNo"],
+                        PHICRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.PHICRegistrationDate"], out var dphic) ? dphic : (DateTime?)null,
+                        HDMFCompanyRegNo = Request.Form["RetainershipSPP.HDMFCompanyRegNo"],
+                        HDMFRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.HDMFRegistrationDate"], out var dhdmf) ? dhdmf : (DateTime?)null,
+                        SPPComplianceActivities = Request.Form["RetainershipSPP.SPPComplianceActivities"],
+                        OtherSPPCompliance = Request.Form["RetainershipSPP.OtherSPPCompliance"],
+                        SPPRetainershipStartDate = DateTime.TryParse(Request.Form["RetainershipSPP.SPPRetainershipStartDate"], out var dspp) ? dspp : (DateTime?)null
+                    };
+                    client.RetainershipSPP = spp;
+                    client.RetainershipBIR = null;
+                    client.OneTimeTransaction = null;
+                    client.ExternalAudit = null;
+                    break;
+                case "One Time Transaction":
+                    var oneTime = new OneTimeTransactionModel
+                    {
+                        TypeOfRegistrant = Request.Form["OneTimeTransaction.TypeOfRegistrant"],
+                        AreaOfServices = Request.Form["OneTimeTransaction.AreaOfServices"],
+                        OtherAreaOfServices = Request.Form["OneTimeTransaction.OtherAreaOfServices"]
+                    };
+                    client.OneTimeTransaction = oneTime;
+                    client.RetainershipBIR = null;
+                    client.RetainershipSPP = null;
+                    client.ExternalAudit = null;
+                    break;
+                case "External Audit":
+                    var audit = new ExternalAuditModel
+                    {
+                        ExternalAuditStatus = Request.Form["ExternalAudit.ExternalAuditStatus"],
+                        ExternalAuditPurposes = Request.Form["ExternalAudit.ExternalAuditPurposes"],
+                        ExternalAuditOtherPurpose = Request.Form["ExternalAudit.ExternalAuditOtherPurpose"],
+                        ExternalAuditReportDate = DateTime.TryParse(Request.Form["ExternalAudit.ExternalAuditReportDate"], out var daudit) ? daudit : (DateTime?)null
+                    };
+                    client.ExternalAudit = audit;
+                    client.RetainershipBIR = null;
+                    client.RetainershipSPP = null;
+                    client.OneTimeTransaction = null;
+                    break;
+            }
+
+            // In Create POST action, after binding project-type-specific data and before ModelState.IsValid:
+            client.OtherTypeOfProject = Request.Form["OtherTypeOfProject"];
+            client.OtherRequestingParty = Request.Form["OtherRequestingParty"];
 
             if (ModelState.IsValid)
             {
@@ -112,6 +198,8 @@ namespace TestingDemo.Controllers
                 TempData["SuccessMessage"] = "Client created successfully!";
                 return RedirectToAction(nameof(Index));
             }
+            // Add debug output for ModelState errors
+            ViewBag.DebugErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return View(client);
         }
 
@@ -142,17 +230,98 @@ namespace TestingDemo.Controllers
                 return NotFound();
             }
 
-            // Clear validation errors for nullable fields if they're empty
             if (string.IsNullOrEmpty(client.TaxId))
                 ModelState.Remove("TaxId");
+
+            // Load the existing client and related data
+            var existingClient = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (existingClient == null)
+                return NotFound();
+
+            // Update base fields
+            _context.Entry(existingClient).CurrentValues.SetValues(client);
+
+            // Update project-type-specific data
+            switch (client.TypeOfProject)
+            {
+                case "Retainership - BIR":
+                    if (existingClient.RetainershipBIR == null)
+                        existingClient.RetainershipBIR = new RetainershipBIRModel();
+                    existingClient.RetainershipBIR.TypeOfRegistrant = Request.Form["RetainershipBIR.TypeOfRegistrant"];
+                    existingClient.RetainershipBIR.OCNNotes = Request.Form["RetainershipBIR.OCNNotes"];
+                    existingClient.RetainershipBIR.DateOCNGenerated = DateTime.TryParse(Request.Form["RetainershipBIR.DateOCNGenerated"], out var docn) ? docn : (DateTime?)null;
+                    existingClient.RetainershipBIR.DateBIRRegistration = DateTime.TryParse(Request.Form["RetainershipBIR.DateBIRRegistration"], out var dreg) ? dreg : (DateTime?)null;
+                    existingClient.RetainershipBIR.BIRRdoNo = Request.Form["RetainershipBIR.BIRRdoNo"];
+                    existingClient.RetainershipBIR.OtherBirRdoNo = Request.Form["RetainershipBIR.OtherBirRdoNo"];
+                    existingClient.RetainershipBIR.TaxFilingStatus = Request.Form["RetainershipBIR.TaxFilingStatus"];
+                    existingClient.RetainershipBIR.NeedCatchUpAccounting = Request.Form["RetainershipBIR.NeedCatchUpAccounting"];
+                    existingClient.RetainershipBIR.CatchUpReasons = Request.Form["RetainershipBIR.CatchUpReasons"];
+                    existingClient.RetainershipBIR.OtherCatchUpReason = Request.Form["RetainershipBIR.OtherCatchUpReason"];
+                    existingClient.RetainershipBIR.CatchUpStartDate = DateTime.TryParse(Request.Form["RetainershipBIR.CatchUpStartDate"], out var dcu) ? dcu : (DateTime?)null;
+                    existingClient.RetainershipBIR.BIRComplianceActivities = Request.Form["RetainershipBIR.BIRComplianceActivities"];
+                    existingClient.RetainershipBIR.OtherBIRCompliance = Request.Form["RetainershipBIR.OtherBIRCompliance"];
+                    existingClient.RetainershipBIR.BIRRetainershipStartDate = DateTime.TryParse(Request.Form["RetainershipBIR.BIRRetainershipStartDate"], out var drs) ? drs : (DateTime?)null;
+                    if (string.IsNullOrWhiteSpace(existingClient.RetainershipBIR.BIRRdoNo))
+                    {
+                        ModelState.AddModelError("RetainershipBIR.BIRRdoNo", "BIR RDO No. is required.");
+                    }
+                    existingClient.RetainershipSPP = null;
+                    existingClient.OneTimeTransaction = null;
+                    existingClient.ExternalAudit = null;
+                    break;
+                case "Retainership - SPP":
+                    if (existingClient.RetainershipSPP == null)
+                        existingClient.RetainershipSPP = new RetainershipSPPModel();
+                    existingClient.RetainershipSPP.SSSCompanyRegNo = Request.Form["RetainershipSPP.SSSCompanyRegNo"];
+                    existingClient.RetainershipSPP.SSSRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.SSSRegistrationDate"], out var dsss) ? dsss : (DateTime?)null;
+                    existingClient.RetainershipSPP.PHICCompanyRegNo = Request.Form["RetainershipSPP.PHICCompanyRegNo"];
+                    existingClient.RetainershipSPP.PHICRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.PHICRegistrationDate"], out var dphic) ? dphic : (DateTime?)null;
+                    existingClient.RetainershipSPP.HDMFCompanyRegNo = Request.Form["RetainershipSPP.HDMFCompanyRegNo"];
+                    existingClient.RetainershipSPP.HDMFRegistrationDate = DateTime.TryParse(Request.Form["RetainershipSPP.HDMFRegistrationDate"], out var dhdmf) ? dhdmf : (DateTime?)null;
+                    existingClient.RetainershipSPP.SPPComplianceActivities = Request.Form["RetainershipSPP.SPPComplianceActivities"];
+                    existingClient.RetainershipSPP.OtherSPPCompliance = Request.Form["RetainershipSPP.OtherSPPCompliance"];
+                    existingClient.RetainershipSPP.SPPRetainershipStartDate = DateTime.TryParse(Request.Form["RetainershipSPP.SPPRetainershipStartDate"], out var dspp) ? dspp : (DateTime?)null;
+                    existingClient.RetainershipBIR = null;
+                    existingClient.OneTimeTransaction = null;
+                    existingClient.ExternalAudit = null;
+                    break;
+                case "One Time Transaction":
+                    if (existingClient.OneTimeTransaction == null)
+                        existingClient.OneTimeTransaction = new OneTimeTransactionModel();
+                    existingClient.OneTimeTransaction.TypeOfRegistrant = Request.Form["OneTimeTransaction.TypeOfRegistrant"];
+                    existingClient.OneTimeTransaction.AreaOfServices = Request.Form["OneTimeTransaction.AreaOfServices"];
+                    existingClient.OneTimeTransaction.OtherAreaOfServices = Request.Form["OneTimeTransaction.OtherAreaOfServices"];
+                    existingClient.RetainershipBIR = null;
+                    existingClient.RetainershipSPP = null;
+                    existingClient.ExternalAudit = null;
+                    break;
+                case "External Audit":
+                    if (existingClient.ExternalAudit == null)
+                        existingClient.ExternalAudit = new ExternalAuditModel();
+                    existingClient.ExternalAudit.ExternalAuditStatus = Request.Form["ExternalAudit.ExternalAuditStatus"];
+                    existingClient.ExternalAudit.ExternalAuditPurposes = Request.Form["ExternalAudit.ExternalAuditPurposes"];
+                    existingClient.ExternalAudit.ExternalAuditOtherPurpose = Request.Form["ExternalAudit.ExternalAuditOtherPurpose"];
+                    existingClient.ExternalAudit.ExternalAuditReportDate = DateTime.TryParse(Request.Form["ExternalAudit.ExternalAuditReportDate"], out var daudit) ? daudit : (DateTime?)null;
+                    existingClient.RetainershipBIR = null;
+                    existingClient.RetainershipSPP = null;
+                    existingClient.OneTimeTransaction = null;
+                    break;
+            }
+
+            // In Edit POST action, after SetValues(client):
+            existingClient.OtherTypeOfProject = Request.Form["OtherTypeOfProject"];
+            existingClient.OtherRequestingParty = Request.Form["OtherRequestingParty"];
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(client);
                     await _context.SaveChangesAsync();
-
                     TempData["SuccessMessage"] = "Client updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -180,6 +349,10 @@ namespace TestingDemo.Controllers
             }
 
             var client = await _context.Clients
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (client == null)
@@ -244,6 +417,21 @@ namespace TestingDemo.Controllers
                 TempData["SuccessMessage"] = $"Client {client.ClientName} has been archived successfully.";
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Finance/ReturnToDocumentOfficer/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReturnToDocumentOfficer(int id)
+        {
+            var client = await _context.Clients.FindAsync(id);
+            if (client != null)
+            {
+                client.Status = "DocumentOfficer";
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Client returned to Document Officer.";
+            }
+            return RedirectToAction("Index");
         }
 
         private bool ClientExists(int id)

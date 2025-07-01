@@ -32,6 +32,10 @@ namespace TestingDemo.Controllers
             }
 
             var client = await _context.Clients
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (client == null)

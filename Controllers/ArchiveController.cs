@@ -19,11 +19,13 @@ namespace TestingDemo.Controllers
         }
 
         // GET: Archive/Index
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, string TypeOfProject, string CreatedDateFrom, string CreatedDateTo)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["TypeSortParm"] = sortOrder == "Type" ? "type_desc" : "Type";
+            ViewData["StatusSortParm"] = sortOrder == "Status" ? "status_desc" : "Status";
 
             if (searchString != null)
             {
@@ -44,6 +46,18 @@ namespace TestingDemo.Controllers
             {
                 clients = clients.Where(s => s.ClientName.Contains(searchString));
             }
+            if (!String.IsNullOrEmpty(TypeOfProject))
+            {
+                clients = clients.Where(s => s.TypeOfProject == TypeOfProject);
+            }
+            if (!String.IsNullOrEmpty(CreatedDateFrom) && DateTime.TryParse(CreatedDateFrom, out var createdDateFrom))
+            {
+                clients = clients.Where(s => s.CreatedDate.Date >= createdDateFrom.Date);
+            }
+            if (!String.IsNullOrEmpty(CreatedDateTo) && DateTime.TryParse(CreatedDateTo, out var createdDateTo))
+            {
+                clients = clients.Where(s => s.CreatedDate.Date <= createdDateTo.Date);
+            }
 
             switch (sortOrder)
             {
@@ -55,6 +69,18 @@ namespace TestingDemo.Controllers
                     break;
                 case "date_desc":
                     clients = clients.OrderByDescending(s => s.CreatedDate);
+                    break;
+                case "Type":
+                    clients = clients.OrderBy(s => s.TypeOfProject);
+                    break;
+                case "type_desc":
+                    clients = clients.OrderByDescending(s => s.TypeOfProject);
+                    break;
+                case "Status":
+                    clients = clients.OrderBy(s => s.Status);
+                    break;
+                case "status_desc":
+                    clients = clients.OrderByDescending(s => s.Status);
                     break;
                 default:
                     clients = clients.OrderBy(s => s.CreatedDate);
@@ -74,6 +100,10 @@ namespace TestingDemo.Controllers
             }
 
             var client = await _context.Clients
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (client == null)

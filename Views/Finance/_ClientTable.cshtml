@@ -15,7 +15,7 @@
                 <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : "")">
                     <td>
                         <strong>@item.ClientName</strong><br>
-                        <small class="text-muted">@item.PermitType | @item.ContactNumber</small>
+                        <small class="text-muted">@item.TypeOfProject | @item.ContactPersonNumber</small>
                     </td>
                     <td>
                         <span
@@ -44,6 +44,12 @@
                             }
                             else if (item.Status == "Clearance")
                             {
+                                <form asp-action="ReturnToDocumentOfficer" asp-route-id="@item.Id" method="post"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-warning" title="Return to Document Officer">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </form>
                                 <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
                                     data-bs-target="#archiveModal" data-client-id="@item.Id" data-client-name="@item.ClientName"
                                     title="Archive Client">

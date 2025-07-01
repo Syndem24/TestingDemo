@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TestingDemo.Models;
 
 namespace TestingDemo.Models
 {
@@ -6,47 +7,54 @@ namespace TestingDemo.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Client Name is required")]
-        [Display(Name = "Client Name")]
-        public string ClientName { get; set; }
-
-        [Required(ErrorMessage = "Contact Number is required")]
-        [Display(Name = "Contact Number")]
-        [Phone]
-        public string ContactNumber { get; set; }
-
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Address is required")]
-        [Display(Name = "Address")]
-        public string Address { get; set; }
+        public string RequestingParty { get; set; }
+        public string RequestorName { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public string ClientType { get; set; }
+
+        [Required(ErrorMessage = "Client Name is required")]
+        [Display(Name = "Client Name")]
+        public string ClientName { get; set; }
+
+        [Display(Name = "Tax ID")]
+        public string? TaxId { get; set; }
+
+        [Required(ErrorMessage = "Contact Number is required")]
+        [Display(Name = "Contact Number")]
+        [Phone]
+        public string ContactPersonNumber { get; set; }
+
+        public string ContactPersonEmailAddress { get; set; }
+
+        public string RegisteredCompanyName { get; set; }
+        [Required(ErrorMessage = "Company Address is required")]
+        [Display(Name = "CompanyAddress")]
+        public string RegisteredCompanyAddress { get; set; }
+        [Required(ErrorMessage = "Project Type is required")]
+        [Display(Name = "Project Type")]
+        public string TypeOfProject { get; set; }
 
         [Required(ErrorMessage = "Urgency Level is required")]
         [Display(Name = "Urgency Level")]
         public string UrgencyLevel { get; set; } = "Normal";
 
-        [Required(ErrorMessage = "Permit Type is required")]
-        [Display(Name = "Permit Type")]
-        public string PermitType { get; set; }
-
-        [Display(Name = "Tax ID")]
-        public string? TaxId { get; set; }
-
-        [Display(Name = "Financial Year")]
-        public string? FinancialYear { get; set; }
-
-        [Display(Name = "Financial Notes")]
-        public string? FinancialNotes { get; set; }
-
-        [Display(Name = "Document References")]
-        public string? DocumentReferences { get; set; }
+        public string Status { get; set; } = "Pending";
 
         [Display(Name = "Planning Return Note")]
         public string? PlanningReturnNote { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public string Status { get; set; } = "Pending";
+        // Navigation properties for project type-specific data
+        public RetainershipBIRModel? RetainershipBIR { get; set; }
+        public RetainershipSPPModel? RetainershipSPP { get; set; }
+        public OneTimeTransactionModel? OneTimeTransaction { get; set; }
+        public ExternalAuditModel? ExternalAudit { get; set; }
+
+        public string? OtherTypeOfProject { get; set; }
+        public string? OtherRequestingParty { get; set; }
     }
 }
