@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace TestingDemo.Controllers
 {
-    [Authorize] // Requires authentication
+    [Authorize(Roles = "Finance,Admin")]
     public class FinanceController : BaseController
     {
         private readonly ApplicationDbContext _context;

@@ -7,7 +7,7 @@ using TestingDemo.Models;
 
 namespace TestingDemo.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "DocumentOfficer,Admin")]
     public class DocumentOfficerController : BaseController
     {
         private readonly ApplicationDbContext _context;

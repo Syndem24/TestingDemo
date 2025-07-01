@@ -40,6 +40,11 @@ public class AccountController : BaseController
         return RedirectToAction("Login");
     }
 
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public class DashboardController : Controller
     {

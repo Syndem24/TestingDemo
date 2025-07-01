@@ -8,7 +8,7 @@ using TestingDemo.Models;
 
 namespace TestingDemo.Controllers
 {
-    [Authorize] // Requires authentication
+    [Authorize(Roles = "PlanningOfficer,Admin")]
     public class PlanningOfficerController : BaseController
     {
         private readonly ApplicationDbContext _context;

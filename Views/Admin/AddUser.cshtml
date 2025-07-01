@@ -74,12 +74,21 @@
         </div>
 
         <div class="input-group">
-            <label for="role">Role:</label>
-            <select id="role" name="role" required>
+            <label for="contactNumber">Contact Number:</label>
+            <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required />
+        </div>
+
+        <div class="input-group">
+            <label for="roles">Roles:</label>
+            <select id="roles" name="roles" multiple required style="height: 120px;">
                 <option value="Admin">Admin</option>
-                <option value="Accountant">Accountant</option>
+                <option value="Finance">Finance</option>
                 <option value="User">User</option>
+                <option value="PlanningOfficer">PlanningOfficer</option>
+                <option value="CustomerCare">CustomerCare</option>
+                <option value="DocumentOfficer">DocumentOfficer</option>
             </select>
+            <small class="text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple roles.</small>
         </div>
 
         <div class="button-group">
@@ -120,7 +129,8 @@
         margin-bottom: 5px;
     }
 
-    input, select {
+    input,
+    select {
         width: 100%;
         padding: 10px;
         font-size: 16px;
@@ -138,17 +148,18 @@
         text-align: left;
     }
 
-        .checkbox-group input {
-            width: auto;
-            margin: 0;
-        }
+    .checkbox-group input {
+        width: auto;
+        margin: 0;
+    }
 
     .button-group {
         display: flex;
         justify-content: space-between;
     }
 
-    .btn-submit, .btn-view {
+    .btn-submit,
+    .btn-view {
         flex: 1;
         padding: 12px;
         margin: 5px;
@@ -166,9 +177,9 @@
         border: none;
     }
 
-        .btn-submit:hover {
-            background: #0056b3;
-        }
+    .btn-submit:hover {
+        background: #0056b3;
+    }
 
     .btn-view {
         background: #28a745;
@@ -176,9 +187,9 @@
         border: none;
     }
 
-        .btn-view:hover {
-            background: #218838;
-        }
+    .btn-view:hover {
+        background: #218838;
+    }
 
     .error-message {
         color: #dc3545;

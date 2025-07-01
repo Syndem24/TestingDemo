@@ -42,7 +42,8 @@ public class AdminController : Controller
         string state,
         string zipCode,
         string country,
-        string role)
+        string contactNumber,
+        List<string> roles)
     {
         try
         {
@@ -52,12 +53,6 @@ public class AdminController : Controller
             {
                 ViewBag.Error = "User with this email already exists.";
                 return View();
-            }
-
-            // Check if role exists
-            if (!await _roleManager.RoleExistsAsync(role))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(role));
             }
 
             // Create new user with all required fields
@@ -73,7 +68,8 @@ public class AdminController : Controller
                 City = city,
                 State = state,
                 ZipCode = zipCode,
-                Country = country
+                Country = country,
+                ContactPersonNumber = contactNumber
             };
 
             // Create the user
@@ -81,9 +77,14 @@ public class AdminController : Controller
 
             if (result.Succeeded)
             {
-                // Assign role to user
-                await _userManager.AddToRoleAsync(user, role);
-                ViewBag.Success = $"User {email} created successfully with role {role}.";
+                // Assign all selected roles
+                foreach (var role in roles)
+                {
+                    if (!await _roleManager.RoleExistsAsync(role))
+                        await _roleManager.CreateAsync(new IdentityRole(role));
+                    await _userManager.AddToRoleAsync(user, role);
+                }
+                ViewBag.Success = $"User {email} created successfully with roles: {string.Join(", ", roles)}.";
             }
             else
             {
@@ -163,7 +164,7 @@ public class AdminController : Controller
             Role = roles.FirstOrDefault()
         };
 
-        ViewBag.Roles = new SelectList(await _roleManager.Roles.Select(r => r.Name).ToListAsync());
+        ViewBag.Roles = new SelectList((await _roleManager.Roles.Select(r => r.Name).ToListAsync()).Where(r => r != "Accountant"));
         return View(model);
     }
 

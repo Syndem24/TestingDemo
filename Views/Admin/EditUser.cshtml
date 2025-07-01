@@ -37,7 +37,8 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="BirthDate"><span class="text-danger">*</span> Birth Date</label>
-                        <input asp-for="BirthDate" type="date" class="form-control" max="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        <input asp-for="BirthDate" type="date" class="form-control"
+                            max="@DateTime.Now.ToString("yyyy-MM-dd")" required />
                         <div class="invalid-feedback">Please enter a valid birth date.</div>
                     </div>
                 </div>
@@ -75,7 +76,8 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="ZipCode">Zip Code</label>
-                        <input asp-for="ZipCode" class="form-control" pattern="\d{4}" title="Enter a 4-digit zip code." />
+                        <input asp-for="ZipCode" class="form-control" pattern="\d{4}"
+                            title="Enter a 4-digit zip code." />
                         <small class="form-text text-muted">Example: 6000</small>
                     </div>
                 </div>

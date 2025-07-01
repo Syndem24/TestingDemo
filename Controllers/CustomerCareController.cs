@@ -8,7 +8,7 @@ using TestingDemo.ViewModels;
 
 namespace TestingDemo.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "CustomerCare,Admin")]
     public class CustomerCareController : BaseController
     {
         private readonly ApplicationDbContext _context;
