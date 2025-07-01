@@ -153,14 +153,3 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
     }
 }
 
-var smtp = new SmtpClient("smtp.gmail.com", 587)
-{
-    Credentials = new NetworkCredential("degamoauchie61@gmail.com", "AuchieDegamo24"),
-    EnableSsl = true
-};
-var mail = new MailMessage("degamoauchie61@gmail.com", "degamoauchie61@gmail.com")
-{
-    Subject = "Test Email",
-    Body = "This is a test."
-};
-smtp.Send(mail);
