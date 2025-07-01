@@ -87,7 +87,7 @@
                             <a class="nav-link text-white" asp-controller="Home" asp-action="Privacy">
                                 <i class="bi bi-shield-lock"></i> Privacy
                             </a>
-                        </li>                        
+                        </li>
                     </ul>
 
                     <!-- Right Navigation -->
@@ -102,34 +102,52 @@
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     @if (User.IsInRole("Admin"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i class="bi bi-people"></i> Manage Users</a></li>
-                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
-                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i class="bi bi-folder-check"></i> Document Officer</a></li>
-                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i class="bi bi-clipboard-check"></i> Planning Officer</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i class="bi bi-bar-chart"></i> Analytics</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i class="bi bi-archive-fill"></i> Archive</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i
+                                                    class="bi bi-people"></i> Manage Users</a></li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                    class="bi bi-person-badge"></i> Customer Care</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i
+                                                    class="bi bi-cash-coin"></i> Finance</a></li>
+                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i
+                                                    class="bi bi-folder-check"></i> Document Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i
+                                                    class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i
+                                                    class="bi bi-bar-chart"></i> Analytics</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i
+                                                    class="bi bi-archive-fill"></i> Archive</a></li>
                                     }
                                     else if (User.IsInRole("Finance"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i class="bi bi-cash-coin"></i> Finance</a></li>
-                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i class="bi bi-bar-chart"></i> Analytics</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i
+                                                    class="bi bi-cash-coin"></i> Finance</a></li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                    class="bi bi-person-badge"></i> Customer Care</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i
+                                                    class="bi bi-bar-chart"></i> Analytics</a></li>
                                     }
                                     else if (User.IsInRole("DocumentOfficer"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i class="bi bi-folder-check"></i> Document Officer</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i class="bi bi-archive-fill"></i> Archive</a></li>
+                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i
+                                                    class="bi bi-folder-check"></i> Document Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i
+                                                    class="bi bi-archive-fill"></i> Archive</a></li>
                                     }
                                     else if (User.IsInRole("PlanningOfficer"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i
+                                                    class="bi bi-clipboard-check"></i> Planning Officer</a></li>
                                     }
                                     else if (User.IsInRole("CustomerCare"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i class="bi bi-person-badge"></i> Customer Care</a></li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                    class="bi bi-person-badge"></i> Customer Care</a></li>
                                     }
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Settings"><i
+                                                class="bi bi-gear"></i> Settings</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                             <button type="submit" class="dropdown-item">

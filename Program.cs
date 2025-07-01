@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Net;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Add MVC
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddSessionStateTempDataProvider();
+
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(20);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
@@ -59,6 +69,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseSession(); // Enable session support
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -141,3 +152,15 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
         Console.WriteLine("❌ Error seeding admin user: " + ex.Message);
     }
 }
+
+var smtp = new SmtpClient("smtp.gmail.com", 587)
+{
+    Credentials = new NetworkCredential("degamoauchie61@gmail.com", "AuchieDegamo24"),
+    EnableSsl = true
+};
+var mail = new MailMessage("degamoauchie61@gmail.com", "degamoauchie61@gmail.com")
+{
+    Subject = "Test Email",
+    Body = "This is a test."
+};
+smtp.Send(mail);

@@ -15,15 +15,27 @@
         <p class="success-message">@ViewBag.Success</p>
     }
 
-    <form method="post">
+    <form id="addUserForm" method="post" data-parsley-validate>
         <div class="input-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter user email" required />
+            <input type="email" id="email" name="email" placeholder="Enter user email" required
+                data-parsley-type="email" data-parsley-trigger="keyup" />
+            <span id="emailFeedback" class="text-danger small"></span>
         </div>
 
         <div class="input-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter user password" required />
+            <input type="password" id="password" name="password" placeholder="Enter user password" required
+                data-parsley-minlength="8" data-parsley-uppercase="1" data-parsley-lowercase="1" data-parsley-number="1"
+                data-parsley-special="1" data-parsley-trigger="keyup" />
+            <div id="passwordStrength" class="small mt-1"></div>
+            <ul id="passwordRequirements" class="small text-muted mb-0" style="list-style: disc; margin-left: 20px;">
+                <li>At least 8 characters</li>
+                <li>At least one uppercase letter</li>
+                <li>At least one lowercase letter</li>
+                <li>At least one number</li>
+                <li>At least one special character</li>
+            </ul>
         </div>
 
         <!-- Show Password Checkbox -->
@@ -39,17 +51,17 @@
         </div>
 
         <div class="input-group">
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" placeholder="Enter age" required min="1" />
-        </div>
-
-        <div class="input-group">
             <label for="birthDate">Birth Date:</label>
             <input type="date" id="birthDate" name="birthDate" required />
         </div>
 
         <div class="input-group">
-            <label for="address">Address:</label>
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" placeholder="Age will be calculated" disabled />
+        </div>
+
+        <div class="input-group">
+            <label for="address">Province:</label>
             <input type="text" id="address" name="address" placeholder="Enter address" required />
         </div>
 
@@ -75,7 +87,12 @@
 
         <div class="input-group">
             <label for="contactNumber">Contact Number:</label>
-            <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required />
+            <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63-9XXXXXXXXX" required
+                pattern="^\+63-9\d{9}$" data-parsley-pattern="^\+63-9\d{9}$"
+                data-parsley-pattern-message="Format: +63-9XXXXXXXXX (must start with 9 and be 10 digits)"
+                maxlength="14" />
+            <small class="text-muted">Format: +63-9XXXXXXXXX (must start with 9, 10 digits after +63-)</small>
+            <span id="contactNumberFeedback" class="text-danger small"></span>
         </div>
 
         <div class="input-group">
@@ -97,14 +114,6 @@
         </div>
     </form>
 </div>
-
-<!-- JavaScript: Show/Hide Password -->
-<script>
-    function togglePassword() {
-        var passwordField = document.getElementById("password");
-        passwordField.type = passwordField.type === "password" ? "text" : "password";
-    }
-</script>
 
 <!-- CSS -->
 <style>
@@ -201,3 +210,121 @@
         font-weight: bold;
     }
 </style>
+
+<!-- jQuery (required for Parsley.js) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Parsley.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var emailInput = document.getElementById('email');
+        var emailFeedback = document.getElementById('emailFeedback');
+        if (emailInput && emailFeedback) {
+            emailInput.addEventListener('input', function () {
+                var email = this.value;
+                var re = /^[^\s]+[^\s]+\.[^\s]+$/;
+                if (!re.test(email)) {
+                    emailFeedback.textContent = 'Please enter a valid email address.';
+                } else {
+                    emailFeedback.textContent = '';
+                }
+            });
+        }
+
+        var passwordInput = document.getElementById('password');
+        var passwordStrength = document.getElementById('passwordStrength');
+        if (passwordInput && passwordStrength) {
+            passwordInput.addEventListener('input', function () {
+                var pw = passwordInput.value;
+                var strength = 0;
+                if (pw.length >= 8) strength++;
+                if (/[A-Z]/.test(pw)) strength++;
+                if (/[a-z]/.test(pw)) strength++;
+                if (/[0-9]/.test(pw)) strength++;
+                if (/[^A-Za-z0-9]/.test(pw)) strength++;
+                var text = '';
+                if (pw.length === 0) text = '';
+                else if (strength <= 2) text = '<span style="color:red">Weak</span>';
+                else if (strength === 3 || strength === 4) text = '<span style="color:orange">Medium</span>';
+                else if (strength === 5) text = '<span style="color:green">Strong</span>';
+                passwordStrength.innerHTML = 'Strength: ' + text;
+            });
+        }
+
+        var showPasswordCheckbox = document.getElementById('showPassword');
+        if (showPasswordCheckbox && passwordInput) {
+            showPasswordCheckbox.addEventListener('change', function () {
+                passwordInput.type = this.checked ? 'text' : 'password';
+            });
+        }
+
+        var birthDateInput = document.getElementById('birthDate');
+        var ageInput = document.getElementById('age');
+        if (birthDateInput && ageInput) {
+            birthDateInput.addEventListener('change', function () {
+                var birthDate = new Date(this.value);
+                var today = new Date();
+                var age = today.getFullYear() - birthDate.getFullYear();
+                var m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                ageInput.value = isNaN(age) || age < 0 ? '' : age;
+            });
+        }
+
+        var contactInput = document.getElementById('contactNumber');
+        var contactFeedback = document.getElementById('contactNumberFeedback');
+        if (contactInput && contactFeedback) {
+            contactInput.addEventListener('input', function () {
+                var value = this.value.replace('+63-', '');
+                if (value.length > 0 && value[0] === '0') {
+                    contactFeedback.textContent = 'Do not start with 0. The number must start with 9.';
+                } else if (value.length > 0 && value[0] !== '9') {
+                    contactFeedback.textContent = 'The number must start with 9.';
+                } else if (value.length > 0 && value.length !== 10) {
+                    contactFeedback.textContent = 'The number must be exactly 10 digits after +63-.';
+                } else {
+                    contactFeedback.textContent = '';
+                }
+            });
+        }
+    });
+
+    // Custom Parsley validators for password
+    window.Parsley.addValidator('uppercase', {
+        requirementType: 'number',
+        validateString: function (value, requirement) {
+            var upper = value.replace(/[^A-Z]/g, "");
+            return upper.length >= requirement;
+        },
+        messages: { en: 'Must have at least %s uppercase letter.' }
+    });
+    window.Parsley.addValidator('lowercase', {
+        requirementType: 'number',
+        validateString: function (value, requirement) {
+            var lower = value.replace(/[^a-z]/g, "");
+            return lower.length >= requirement;
+        },
+        messages: { en: 'Must have at least %s lowercase letter.' }
+    });
+    window.Parsley.addValidator('number', {
+        requirementType: 'number',
+        validateString: function (value, requirement) {
+            var num = value.replace(/[^0-9]/g, "");
+            return num.length >= requirement;
+        },
+        messages: { en: 'Must have at least %s number.' }
+    });
+    window.Parsley.addValidator('special', {
+        requirementType: 'number',
+        validateString: function (value, requirement) {
+            var special = value.replace(/[A-Za-z0-9]/g, "");
+            return special.length >= requirement;
+        },
+        messages: { en: 'Must have at least %s special character such as !#$%^&*().' }
+    });
+
+    // Initialize Parsley
+    $(function () { $('#addUserForm').parsley(); });
+</script>
