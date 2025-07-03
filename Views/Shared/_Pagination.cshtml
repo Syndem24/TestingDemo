@@ -1,13 +1,15 @@
 @model ViewDataDictionary
 @{
     var pageModel = ViewData["pageModel"] as TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>;
-    var pageAction = ViewData["pageAction"].ToString();
+    var pageAction = ViewData["pageAction"]?.ToString() ?? string.Empty;
     // Determine which page number belongs to this pagination instance
-    var isPendingPaginator = ViewData["pageNumberParam"].ToString() == "pendingPageNumber";
+    var isPendingPaginator = (ViewData["pageNumberParam"]?.ToString() ?? "") == "pendingPageNumber";
 
     // Get both page numbers from the main view's model
-    var pendingPage = isPendingPaginator ? pageModel.PageIndex : (int)ViewData["otherPageNumber"];
-    var clearancePage = !isPendingPaginator ? pageModel.PageIndex : (int)ViewData["otherPageNumber"];
+    var otherPageNumberObj = ViewData["otherPageNumber"];
+    var otherPageNumber = otherPageNumberObj is int pageNum ? pageNum : 1;
+    var pendingPage = isPendingPaginator ? (pageModel?.PageIndex ?? 1) : otherPageNumber;
+    var clearancePage = !isPendingPaginator ? (pageModel?.PageIndex ?? 1) : otherPageNumber;
 
     var sortOrder = ViewData["CurrentSort"] as string;
     var searchString = ViewData["CurrentFilter"] as string;

@@ -256,6 +256,36 @@ public class AdminController : Controller
 
         return RedirectToAction("Users");
     }
+
+    public async Task<IActionResult> PendingApprovals()
+    {
+        var users = await _userManager.Users.Where(u => !u.IsApproved).ToListAsync();
+        var userViewModels = new List<UserViewModel>();
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            userViewModels.Add(new UserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = roles.FirstOrDefault() ?? "No Role"
+            });
+        }
+        return View(userViewModels);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ApproveUser(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user != null)
+        {
+            user.IsApproved = true;
+            await _userManager.UpdateAsync(user);
+        }
+        return RedirectToAction("PendingApprovals");
+    }
 }
 
 // View model for displaying users

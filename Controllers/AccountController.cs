@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Collections.Concurrent;
 using TestingDemo.ViewModels;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 public class AccountController : BaseController
 {
@@ -24,6 +25,8 @@ public class AccountController : BaseController
 
     public IActionResult Login()
     {
+        if (TempData["Success"] != null)
+            ViewBag.Success = TempData["Success"];
         return View();
     }
 
@@ -33,6 +36,13 @@ public class AccountController : BaseController
         var user = await _userManager.FindByEmailAsync(email);
         if (user != null)
         {
+            var roles = await _userManager.GetRolesAsync(user);
+            bool isAdmin = roles.Contains("Admin");
+            if (!isAdmin && !user.IsApproved)
+            {
+                ViewBag.Error = "Your account is pending admin approval. Please wait for approval.";
+                return View();
+            }
             var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
             if (result.Succeeded)
             {
@@ -120,12 +130,21 @@ public class AccountController : BaseController
         try
         {
             var smtpSection = _config.GetSection("Smtp");
-            var smtp = new SmtpClient(smtpSection["Host"], int.Parse(smtpSection["Port"]))
+            var smtpHost = smtpSection["Host"] ?? "";
+            var smtpPortStr = smtpSection["Port"];
+            var smtpPort = 587;
+            if (!string.IsNullOrEmpty(smtpPortStr) && int.TryParse(smtpPortStr, out var parsedPort))
+                smtpPort = parsedPort;
+            var smtpUser = smtpSection["Username"] ?? "";
+            var smtpPass = smtpSection["Password"] ?? "";
+            var smtpFrom = smtpSection["From"] ?? smtpUser;
+            var toEmail = user.Email ?? "";
+            var smtp = new SmtpClient(smtpHost, smtpPort)
             {
-                Credentials = new NetworkCredential(smtpSection["Username"], smtpSection["Password"]),
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
                 EnableSsl = true
             };
-            var mail = new MailMessage(smtpSection["From"], user.Email)
+            var mail = new MailMessage(smtpFrom, toEmail)
             {
                 Subject = "Password Change OTP",
                 Body = $"Your password change code is: {otp}"
@@ -189,12 +208,21 @@ public class AccountController : BaseController
         try
         {
             var smtpSection = _config.GetSection("Smtp");
-            var smtp = new SmtpClient(smtpSection["Host"], int.Parse(smtpSection["Port"]))
+            var smtpHost = smtpSection["Host"] ?? "";
+            var smtpPortStr = smtpSection["Port"];
+            var smtpPort = 587;
+            if (!string.IsNullOrEmpty(smtpPortStr) && int.TryParse(smtpPortStr, out var parsedPort))
+                smtpPort = parsedPort;
+            var smtpUser = smtpSection["Username"] ?? "";
+            var smtpPass = smtpSection["Password"] ?? "";
+            var smtpFrom = smtpSection["From"] ?? smtpUser;
+            var toEmail = user.Email ?? "";
+            var smtp = new SmtpClient(smtpHost, smtpPort)
             {
-                Credentials = new NetworkCredential(smtpSection["Username"], smtpSection["Password"]),
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
                 EnableSsl = true
             };
-            var mail = new MailMessage(smtpSection["From"], user.Email)
+            var mail = new MailMessage(smtpFrom, toEmail)
             {
                 Subject = "Password Changed",
                 Body = "Your password was changed. If this wasn't you, please contact support."
@@ -248,12 +276,21 @@ public class AccountController : BaseController
         try
         {
             var smtpSection = _config.GetSection("Smtp");
-            var smtp = new SmtpClient(smtpSection["Host"], int.Parse(smtpSection["Port"]))
+            var smtpHost = smtpSection["Host"] ?? "";
+            var smtpPortStr = smtpSection["Port"];
+            var smtpPort = 587;
+            if (!string.IsNullOrEmpty(smtpPortStr) && int.TryParse(smtpPortStr, out var parsedPort))
+                smtpPort = parsedPort;
+            var smtpUser = smtpSection["Username"] ?? "";
+            var smtpPass = smtpSection["Password"] ?? "";
+            var smtpFrom = smtpSection["From"] ?? smtpUser;
+            var toEmail = user.Email ?? "";
+            var smtp = new SmtpClient(smtpHost, smtpPort)
             {
-                Credentials = new NetworkCredential(smtpSection["Username"], smtpSection["Password"]),
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
                 EnableSsl = true
             };
-            var mail = new MailMessage(smtpSection["From"], user.Email)
+            var mail = new MailMessage(smtpFrom, toEmail)
             {
                 Subject = "Password Change OTP",
                 Body = $"Your new password change code is: {otp}"
@@ -265,5 +302,159 @@ public class AccountController : BaseController
         HttpContext.Session.SetString(resendTimeKey, DateTime.UtcNow.ToString("o"));
         TempData["OtpNotice"] = "A new code has been sent to your email.";
         return RedirectToAction("ConfirmChangePassword");
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            ViewBag.Error = "No account found with that email.";
+            return View();
+        }
+        if (!user.IsApproved)
+        {
+            ViewBag.Error = "Your account is pending admin approval. You cannot reset your password until it is approved.";
+            return View();
+        }
+        // Generate OTP
+        var otp = new Random().Next(100000, 999999).ToString();
+        HttpContext.Session.SetString("ResetPwOtp", otp);
+        HttpContext.Session.SetString("ResetPwEmail", email);
+        HttpContext.Session.SetString("ResetPwOtpTime", DateTime.UtcNow.ToString("o"));
+        // Email OTP
+        try
+        {
+            var smtpSection = _config.GetSection("Smtp");
+            var smtpHost = smtpSection["Host"] ?? "";
+            var smtpPortStr = smtpSection["Port"];
+            var smtpPort = 587;
+            if (!string.IsNullOrEmpty(smtpPortStr) && int.TryParse(smtpPortStr, out var parsedPort))
+                smtpPort = parsedPort;
+            var smtpUser = smtpSection["Username"] ?? "";
+            var smtpPass = smtpSection["Password"] ?? "";
+            var smtpFrom = smtpSection["From"] ?? smtpUser;
+            var toEmail = user.Email ?? "";
+            var smtp = new SmtpClient(smtpHost, smtpPort)
+            {
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
+                EnableSsl = true
+            };
+            var mail = new MailMessage(smtpFrom, toEmail)
+            {
+                Subject = "Password Reset OTP",
+                Body = $"Your password reset code is: {otp}"
+            };
+            smtp.Send(mail);
+        }
+        catch (Exception ex) { System.IO.File.AppendAllText("email_error.log", ex.ToString() + "\n"); }
+        TempData["OtpNotice"] = "A code has been sent to your email. Enter it to continue.";
+        return RedirectToAction("ResetPasswordOtp");
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResetPasswordOtp()
+    {
+        if (TempData["OtpNotice"] != null)
+            ViewBag.OtpNotice = TempData["OtpNotice"];
+        return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public IActionResult ResetPasswordOtp(string otp)
+    {
+        var expectedOtp = HttpContext.Session.GetString("ResetPwOtp");
+        var otpTimeStr = HttpContext.Session.GetString("ResetPwOtpTime");
+        if (expectedOtp == null || otpTimeStr == null)
+        {
+            ModelState.AddModelError("", "OTP session expired. Please try again.");
+            return View();
+        }
+        if ((DateTime.UtcNow - DateTime.Parse(otpTimeStr)).TotalMinutes > 5)
+        {
+            ModelState.AddModelError("", "OTP expired. Please try again.");
+            return View();
+        }
+        if (otp != expectedOtp)
+        {
+            ModelState.AddModelError("", "Invalid code. Please check your email and try again.");
+            return View();
+        }
+        // OTP is valid, set session flag and redirect to new password page
+        HttpContext.Session.SetString("ResetPwOtpVerified", "true");
+        return RedirectToAction("ResetPasswordNew");
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResetPasswordNew()
+    {
+        // Only allow if OTP was just verified
+        if (HttpContext.Session.GetString("ResetPwOtpVerified") != "true")
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+        return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPasswordNew(string newPassword, string confirmPassword)
+    {
+        if (HttpContext.Session.GetString("ResetPwOtpVerified") != "true")
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+        var email = HttpContext.Session.GetString("ResetPwEmail");
+        if (email == null)
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8 ||
+            !newPassword.Any(char.IsUpper) || !newPassword.Any(char.IsLower) ||
+            !newPassword.Any(char.IsDigit) || !newPassword.Any(ch => !char.IsLetterOrDigit(ch)))
+        {
+            ModelState.AddModelError("NewPassword", "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+            return View();
+        }
+        if (newPassword != confirmPassword)
+        {
+            ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
+            return View();
+        }
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            ModelState.AddModelError("", "User not found.");
+            return View();
+        }
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        if (!result.Succeeded)
+        {
+            ModelState.AddModelError("", string.Join("; ", result.Errors.Select(e => e.Description)));
+            return View();
+        }
+        // Set IsApproved = false ONLY after password reset
+        user.IsApproved = false;
+        await _userManager.UpdateAsync(user);
+        // Clear session
+        HttpContext.Session.Remove("ResetPwOtp");
+        HttpContext.Session.Remove("ResetPwEmail");
+        HttpContext.Session.Remove("ResetPwOtpTime");
+        HttpContext.Session.Remove("ResetPwOtpVerified");
+        TempData["Success"] = "Your account changes will need approval of the administrator. Please contact the authorized person.";
+        return RedirectToAction("Login");
     }
 }

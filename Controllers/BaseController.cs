@@ -11,8 +11,8 @@ public class BaseController : Controller
             var controllerName = context.RouteData.Values["controller"]?.ToString();
             var actionName = context.RouteData.Values["action"]?.ToString();
 
-            // Do NOT redirect if already on login, access denied, or similar public pages
-            if (!(controllerName == "Account" && (actionName == "Login" || actionName == "AccessDenied")))
+            // Do NOT redirect if already on login, access denied, forgot password, or reset password pages
+            if (!(controllerName == "Account" && (actionName == "Login" || actionName == "AccessDenied" || actionName == "ForgotPassword" || actionName == "ResetPasswordOtp" || actionName == "ResetPasswordNew")))
             {
                 context.Result = RedirectToAction("Login", "Account");
             }

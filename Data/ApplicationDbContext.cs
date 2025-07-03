@@ -16,6 +16,7 @@ public class ApplicationUser : IdentityUser
     public string? ZipCode { get; set; }
     public string? Country { get; set; }
     public string? ContactPersonNumber { get; set; } // Employee contact number
+    public bool IsApproved { get; set; } = true;
 }
 
 
