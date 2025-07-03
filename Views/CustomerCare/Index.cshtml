@@ -310,21 +310,23 @@
     </div>
 </div>
 
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Mark as Received
             var marModal = document.getElementById('markAsReceivedModal');
             marModal.addEventListener('show.bs.modal', function (event) {
                 var button = event.relatedTarget;
                 var clientId = button.getAttribute('data-client-id');
                 var clientName = button.getAttribute('data-client-name');
-                var modalTitle = marModal.querySelector('.modal-title');
                 var modalBodyName = marModal.querySelector('#marClientName');
                 var form = marModal.querySelector('#marForm');
                 modalBodyName.textContent = clientName;
                 form.action = '/CustomerCare/MarkAsReceived/' + clientId;
             });
-
+            // Return to Planning
             var rtpModal = document.getElementById('returnToPlanningModal');
             rtpModal.addEventListener('show.bs.modal', function (event) {
                 var button = event.relatedTarget;
@@ -335,7 +337,7 @@
                 modalBodyName.textContent = clientName;
                 form.action = '/CustomerCare/ReturnToPlanning/' + clientId;
             });
-
+            // Proceed to Document Officer
             var pdoModal = document.getElementById('proceedToDocOfficerModal');
             pdoModal.addEventListener('show.bs.modal', function (event) {
                 var button = event.relatedTarget;
@@ -347,5 +349,36 @@
                 form.action = '/CustomerCare/ProceedToDocumentOfficer/' + clientId;
             });
         });
+        // Store initial client IDs for Liaison and Received tables
+        let liaisonClientIds = Array.from(document.querySelectorAll('.col-lg-6:first-child tbody tr')).map(row => row.querySelector('[data-client-id]')?.getAttribute('data-client-id')).filter(Boolean);
+        let receivedClientIds = Array.from(document.querySelectorAll('.col-lg-6:last-child tbody tr')).map(row => row.querySelector('[data-client-id]')?.getAttribute('data-client-id')).filter(Boolean);
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderCustomerCare(data) {
+            // Check for new clients in Liaison
+            let newLiaisonIds = (data.LiaisonClients.items || []).map(c => c.id?.toString());
+            let isNewLiaison = newLiaisonIds.some(id => !liaisonClientIds.includes(id));
+            // Check for new clients in Received
+            let newReceivedIds = (data.ReceivedClients.items || []).map(c => c.id?.toString());
+            let isNewReceived = newReceivedIds.some(id => !receivedClientIds.includes(id));
+            if (isNewLiaison || isNewReceived) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/CustomerCare/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderCustomerCare(data);
+                    });
+            });
+        }
     </script>
 }

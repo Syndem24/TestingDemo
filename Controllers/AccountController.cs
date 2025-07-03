@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using TestingDemo.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 public class AccountController : BaseController
 {
@@ -15,12 +16,14 @@ public class AccountController : BaseController
     private readonly UserManager<ApplicationUser> _userManager;
     private static ConcurrentDictionary<string, (int FailCount, DateTime? BlockUntil)> _changePwAttempts = new();
     private readonly IConfiguration _config;
+    private readonly IHubContext<NotificationHub> _hubContext;
 
-    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration config)
+    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration config, IHubContext<NotificationHub> hubContext)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _config = config;
+        _hubContext = hubContext;
     }
 
     public IActionResult Login()
@@ -46,6 +49,8 @@ public class AccountController : BaseController
             var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
             if (result.Succeeded)
             {
+                // Notify all clients of a data change
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "User logged in");
                 return RedirectToAction("Index", "Home"); // Redirect to dashboard
             }
         }

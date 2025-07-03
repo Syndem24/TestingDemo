@@ -34,6 +34,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // ===== Auto Migrate and Seed Roles & Admin User =====
@@ -76,6 +78,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapDefaultControllerRoute();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
 

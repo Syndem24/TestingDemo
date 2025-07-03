@@ -94,6 +94,7 @@
         </div>
     </div>
 </div>
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -114,5 +115,31 @@
                 }
             });
         });
+        // Store initial client IDs for Document Officer table
+        let docOfficerClientIds = Array.from(document.querySelectorAll('tbody tr')).map(row => row.querySelector('.done-btn')?.getAttribute('data-client-id')).filter(Boolean);
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderDocumentOfficer(data) {
+            let newIds = (data || []).map(c => c.id?.toString());
+            let isNew = newIds.some(id => !docOfficerClientIds.includes(id));
+            if (isNew) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/DocumentOfficer/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderDocumentOfficer(data);
+                    });
+            });
+        }
     </script>
 }

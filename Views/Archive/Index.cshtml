@@ -132,3 +132,36 @@
         </div>
     </div>
 </div>
+
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
+
+@section Scripts {
+    <script>
+        // Store initial client IDs for Archive table
+        let archiveClientIds = Array.from(document.querySelectorAll('tbody tr')).map(row => row.querySelector('a[asp-route-id]')?.getAttribute('asp-route-id')).filter(Boolean);
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderArchive(data) {
+            let newIds = (data.items || []).map(c => c.id?.toString());
+            let isNew = newIds.some(id => !archiveClientIds.includes(id));
+            if (isNew) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/Archive/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderArchive(data);
+                    });
+            });
+        }
+    </script>
+}

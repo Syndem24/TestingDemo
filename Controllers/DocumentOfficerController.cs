@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using TestingDemo.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TestingDemo.Controllers
 {
@@ -11,9 +12,12 @@ namespace TestingDemo.Controllers
     public class DocumentOfficerController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public DocumentOfficerController(ApplicationDbContext context)
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+        public DocumentOfficerController(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: DocumentOfficer/Index
@@ -56,6 +60,7 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "Clearance";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "DocumentOfficer data changed");
                 TempData["SuccessMessage"] = "Client has been sent to Finance for clearance.";
             }
             return RedirectToAction("Index");
@@ -71,9 +76,17 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "CustomerCareReceived";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "DocumentOfficer data changed");
                 TempData["SuccessMessage"] = "Client returned to Customer Care (Received).";
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestData()
+        {
+            var clients = await _context.Clients.Where(c => c.Status == "DocumentOfficer").ToListAsync();
+            return Json(clients);
         }
     }
 }

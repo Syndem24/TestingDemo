@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TestingDemo.Models;
 using TestingDemo.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TestingDemo.Controllers
 {
@@ -14,10 +15,12 @@ namespace TestingDemo.Controllers
     public class FinanceController : BaseController
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public FinanceController(ApplicationDbContext context)
+        public FinanceController(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: Finance/Index
@@ -194,7 +197,7 @@ namespace TestingDemo.Controllers
 
                 _context.Add(client);
                 await _context.SaveChangesAsync();
-
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
                 TempData["SuccessMessage"] = "Client created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -322,6 +325,7 @@ namespace TestingDemo.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
                     TempData["SuccessMessage"] = "Client updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -373,7 +377,7 @@ namespace TestingDemo.Controllers
             {
                 _context.Clients.Remove(client);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Client deleted successfully!";
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
             }
 
             return RedirectToAction(nameof(Index));
@@ -391,6 +395,7 @@ namespace TestingDemo.Controllers
                 // Update status to indicate it's ready for planning
                 client.Status = "Planning";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
 
                 TempData["SuccessMessage"] = "Client sent to Planning Officer successfully!";
 
@@ -414,6 +419,7 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "Archived";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
                 TempData["SuccessMessage"] = $"Client {client.ClientName} has been archived successfully.";
             }
             return RedirectToAction(nameof(Index));
@@ -429,9 +435,48 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "DocumentOfficer";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
                 TempData["SuccessMessage"] = "Client returned to Document Officer.";
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestData(string sortOrder, string searchString, int? pendingPageNumber, int? clearancePageNumber)
+        {
+            int pageSize = 5;
+            var pendingQuery = _context.Clients.Where(c => c.Status == "Pending" || c.Status == "Finance").AsNoTracking();
+            var clearanceQuery = _context.Clients.Where(c => c.Status == "Clearance").AsNoTracking();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                pendingQuery = pendingQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+                clearanceQuery = clearanceQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    pendingQuery = pendingQuery.OrderByDescending(s => s.ClientName);
+                    clearanceQuery = clearanceQuery.OrderByDescending(s => s.ClientName);
+                    break;
+                case "Date":
+                    pendingQuery = pendingQuery.OrderBy(s => s.CreatedDate);
+                    clearanceQuery = clearanceQuery.OrderBy(s => s.CreatedDate);
+                    break;
+                case "date_desc":
+                    pendingQuery = pendingQuery.OrderByDescending(s => s.CreatedDate);
+                    clearanceQuery = clearanceQuery.OrderByDescending(s => s.CreatedDate);
+                    break;
+                default:
+                    pendingQuery = pendingQuery.OrderBy(s => s.CreatedDate);
+                    clearanceQuery = clearanceQuery.OrderBy(s => s.CreatedDate);
+                    break;
+            }
+            var viewModel = new TestingDemo.ViewModels.FinanceDashboardViewModel
+            {
+                PendingClients = await TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>.CreateAsync(pendingQuery, pendingPageNumber ?? 1, pageSize),
+                ClearanceClients = await TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>.CreateAsync(clearanceQuery, clearancePageNumber ?? 1, pageSize)
+            };
+            return Json(viewModel);
         }
 
         private bool ClientExists(int id)

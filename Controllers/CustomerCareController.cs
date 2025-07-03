@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TestingDemo.Models;
 using TestingDemo.ViewModels;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TestingDemo.Controllers
 {
@@ -12,9 +13,12 @@ namespace TestingDemo.Controllers
     public class CustomerCareController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public CustomerCareController(ApplicationDbContext context)
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+        public CustomerCareController(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: CustomerCare/Index
@@ -102,6 +106,7 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "CustomerCareReceived";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "CustomerCare data changed");
                 TempData["SuccessMessage"] = "Client marked as received.";
             }
             return RedirectToAction("Index");
@@ -117,6 +122,7 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "DocumentOfficer";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "CustomerCare data changed");
                 TempData["SuccessMessage"] = "Client moved to Document Officer.";
             }
             return RedirectToAction("Index");
@@ -158,6 +164,44 @@ namespace TestingDemo.Controllers
             TempData["SuccessMessage"] = "Requirements inspection saved successfully.";
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestData(string sortOrder, string searchString, int? liaisonPageNumber, int? receivedPageNumber)
+        {
+            int pageSize = 5;
+            var liaisonQuery = _context.Clients.Where(c => c.Status == "Liaison").AsNoTracking();
+            var receivedQuery = _context.Clients.Where(c => c.Status == "CustomerCareReceived").AsNoTracking();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                liaisonQuery = liaisonQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+                receivedQuery = receivedQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    liaisonQuery = liaisonQuery.OrderByDescending(s => s.ClientName);
+                    receivedQuery = receivedQuery.OrderByDescending(s => s.ClientName);
+                    break;
+                case "Date":
+                    liaisonQuery = liaisonQuery.OrderBy(s => s.CreatedDate);
+                    receivedQuery = receivedQuery.OrderBy(s => s.CreatedDate);
+                    break;
+                case "date_desc":
+                    liaisonQuery = liaisonQuery.OrderByDescending(s => s.CreatedDate);
+                    receivedQuery = receivedQuery.OrderByDescending(s => s.CreatedDate);
+                    break;
+                default:
+                    liaisonQuery = liaisonQuery.OrderBy(s => s.CreatedDate);
+                    receivedQuery = receivedQuery.OrderBy(s => s.CreatedDate);
+                    break;
+            }
+            var viewModel = new TestingDemo.ViewModels.CustomerCareDashboardViewModel
+            {
+                LiaisonClients = await TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>.CreateAsync(liaisonQuery, liaisonPageNumber ?? 1, pageSize),
+                ReceivedClients = await TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>.CreateAsync(receivedQuery, receivedPageNumber ?? 1, pageSize)
+            };
+            return Json(viewModel);
         }
     }
 }

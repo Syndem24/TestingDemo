@@ -303,28 +303,36 @@
         </div>
     </div>
 </div>
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Pass data to JS for external file
-        window.analyticsData = {
-            statusLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByStatus.Keys)),
-            statusData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByStatus.Values)),
-            typeLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByType.Keys)),
-            typeData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByType.Values)),
-            urgencyLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByUrgency.Keys)),
-            urgencyData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByUrgency.Values)),
-            monthLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByMonth.Keys)),
-            monthData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ClientsByMonth.Values)),
-            urgentTrendLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.UrgentRequestsTrend != null ? Model.UrgentRequestsTrend.Keys.ToList() : new List<string>()))),
-            urgentTrendData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((Model.UrgentRequestsTrend != null ? Model.UrgentRequestsTrend.Values.ToList() : new List<int>()))),
-            heatmapLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRequestCounts?.Select(x => x.Date.ToString("yyyy-MM-dd")) ?? new List<string>())),
-            heatmapData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRequestCounts?.Select(x => x.Count) ?? new List<int>()))
-                                    };
-        window.analyticsData = Object.assign(window.analyticsData || {}, {
-            approvalFunnelLabels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ApprovalFunnelCounts?.Keys?.ToList() ?? new List<string>())),
-            approvalFunnelData: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ApprovalFunnelCounts?.Values?.ToList() ?? new List<int>())),
-        });
+        // Store initial client IDs for Analytics (using FilteredClients)
+        let analyticsClientIds = (@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FilteredClients.Select(c => c.Id.ToString()).ToList())));
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderAnalytics(data) {
+            let newIds = (data.FilteredClients || []).map(c => c.id?.toString());
+            let isNew = newIds.some(id => !analyticsClientIds.includes(id));
+            if (isNew) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/Analytics/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderAnalytics(data);
+                    });
+            });
+        }
     </script>
     <script src="~/js/analytics-charts.js"></script>
 }

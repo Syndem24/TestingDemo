@@ -5,19 +5,23 @@ using Microsoft.AspNetCore.Mvc.Rendering; // ✅ Add this line
 using Microsoft.EntityFrameworkCore;
 using TestingDemo.ViewModels;
 using TestingDemo.Models; // Add this for ApplicationUser
+using Microsoft.AspNetCore.SignalR;
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IHubContext<NotificationHub> _hubContext;
 
     public AdminController(
         UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IHubContext<NotificationHub> hubContext)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _hubContext = hubContext;
     }
 
     public IActionResult Index()
@@ -85,6 +89,7 @@ public class AdminController : Controller
                     await _userManager.AddToRoleAsync(user, role);
                 }
                 ViewBag.Success = $"User {email} created successfully with roles: {string.Join(", ", roles)}.";
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Admin data changed");
             }
             else
             {
@@ -189,6 +194,7 @@ public class AdminController : Controller
             await _userManager.AddToRoleAsync(user, model.Role);
 
         await _userManager.UpdateAsync(user);
+        await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Admin data changed");
         return RedirectToAction("Users");
     }
 
@@ -198,11 +204,8 @@ public class AdminController : Controller
         var user = await _userManager.FindByIdAsync(id);
         if (user != null)
         {
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Users");
-            }
+            await _userManager.DeleteAsync(user);
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Admin data changed");
         }
         return RedirectToAction("Users");
     }
@@ -284,6 +287,7 @@ public class AdminController : Controller
         {
             user.IsApproved = true;
             await _userManager.UpdateAsync(user);
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Admin data changed");
         }
         return RedirectToAction("PendingApprovals");
     }

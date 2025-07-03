@@ -208,6 +208,8 @@
     </div>
 </div>
 
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -270,6 +272,36 @@
                 });
             }, 5000);
         });
+
+        // Store initial client IDs for Pending and Clearance tables
+        let pendingClientIds = Array.from(document.querySelectorAll('.card:has(.bg-secondary) tbody tr')).map(row => row.querySelector('[data-client-id]')?.getAttribute('data-client-id')).filter(Boolean);
+        let clearanceClientIds = Array.from(document.querySelectorAll('.card:has(.bg-warning) tbody tr')).map(row => row.querySelector('[data-client-id]')?.getAttribute('data-client-id')).filter(Boolean);
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderFinance(data) {
+            let newPendingIds = (data.PendingClients.items || []).map(c => c.id?.toString());
+            let isNewPending = newPendingIds.some(id => !pendingClientIds.includes(id));
+            let newClearanceIds = (data.ClearanceClients.items || []).map(c => c.id?.toString());
+            let isNewClearance = newClearanceIds.some(id => !clearanceClientIds.includes(id));
+            if (isNewPending || isNewClearance) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/Finance/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderFinance(data);
+                    });
+            });
+        }
     </script>
 }
 

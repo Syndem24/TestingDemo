@@ -172,6 +172,8 @@
     </div>
 </div>
 
+<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
+
 <!-- Scripts -->
 <script>
     // Secondary Screen Detection
@@ -227,6 +229,59 @@
             });
         });
     });
+
+    // Store initial client IDs for all dashboard tables
+    function getClientIds(selector) {
+        return Array.from(document.querySelectorAll(selector)).map(row => row.querySelector('td[title]')?.textContent?.trim()).filter(Boolean);
+    }
+    let liaisonClientIds = getClientIds('.dashboard-liaison tbody tr');
+    let financeClientIds = getClientIds('.dashboard-finance tbody tr');
+    let receivedClientIds = getClientIds('.dashboard-received tbody tr');
+    let planningClientIds = getClientIds('.dashboard-planning tbody tr');
+    let documentationClientIds = getClientIds('.dashboard-documentation tbody tr');
+    function playNotifySound() {
+        var audio = document.getElementById('notifySound');
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
+    function renderHomeDashboard(data) {
+        let isNew = false;
+        if (data.LiaisonClients) {
+            let newIds = (data.LiaisonClients || []).map(c => c.clientName);
+            isNew = newIds.some(id => !liaisonClientIds.includes(id));
+        }
+        if (data.FinanceClients) {
+            let newIds = (data.FinanceClients || []).map(c => c.clientName);
+            isNew = isNew || newIds.some(id => !financeClientIds.includes(id));
+        }
+        if (data.ReceivedClients) {
+            let newIds = (data.ReceivedClients || []).map(c => c.clientName);
+            isNew = isNew || newIds.some(id => !receivedClientIds.includes(id));
+        }
+        if (data.PlanningClients) {
+            let newIds = (data.PlanningClients || []).map(c => c.clientName);
+            isNew = isNew || newIds.some(id => !planningClientIds.includes(id));
+        }
+        if (data.DocumentationClients) {
+            let newIds = (data.DocumentationClients || []).map(c => c.clientName);
+            isNew = isNew || newIds.some(id => !documentationClientIds.includes(id));
+        }
+        if (isNew) {
+            playNotifySound();
+        }
+        location.reload();
+    }
+    if (window.connection) {
+        connection.on("ReceiveUpdate", function (message) {
+            fetch('/Home/GetLatestData')
+                .then(response => response.json())
+                .then(data => {
+                    renderHomeDashboard(data);
+                });
+        });
+    }
 </script>
 
 @functions {
@@ -240,4 +295,61 @@
             _ => ""
         };
     }
+}
+
+@section Scripts {
+    <script>
+        // Store initial client IDs for all dashboard tables
+        function getClientIds(selector) {
+            return Array.from(document.querySelectorAll(selector)).map(row => row.querySelector('td[title]')?.textContent?.trim()).filter(Boolean);
+        }
+        let liaisonClientIds = getClientIds('.dashboard-liaison tbody tr');
+        let financeClientIds = getClientIds('.dashboard-finance tbody tr');
+        let receivedClientIds = getClientIds('.dashboard-received tbody tr');
+        let planningClientIds = getClientIds('.dashboard-planning tbody tr');
+        let documentationClientIds = getClientIds('.dashboard-documentation tbody tr');
+        function playNotifySound() {
+            var audio = document.getElementById('notifySound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+        }
+        function renderHomeDashboard(data) {
+            let isNew = false;
+            if (data.LiaisonClients) {
+                let newIds = (data.LiaisonClients || []).map(c => c.clientName);
+                isNew = newIds.some(id => !liaisonClientIds.includes(id));
+            }
+            if (data.FinanceClients) {
+                let newIds = (data.FinanceClients || []).map(c => c.clientName);
+                isNew = isNew || newIds.some(id => !financeClientIds.includes(id));
+            }
+            if (data.ReceivedClients) {
+                let newIds = (data.ReceivedClients || []).map(c => c.clientName);
+                isNew = isNew || newIds.some(id => !receivedClientIds.includes(id));
+            }
+            if (data.PlanningClients) {
+                let newIds = (data.PlanningClients || []).map(c => c.clientName);
+                isNew = isNew || newIds.some(id => !planningClientIds.includes(id));
+            }
+            if (data.DocumentationClients) {
+                let newIds = (data.DocumentationClients || []).map(c => c.clientName);
+                isNew = isNew || newIds.some(id => !documentationClientIds.includes(id));
+            }
+            if (isNew) {
+                playNotifySound();
+            }
+            location.reload();
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/Home/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderHomeDashboard(data);
+                    });
+            });
+        }
+    </script>
 }

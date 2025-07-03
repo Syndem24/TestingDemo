@@ -192,6 +192,29 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        // Only enable real-time update logic if not on the login page
+        if (window.location.pathname.toLowerCase() !== "/account/login") {
+            connection.on("ReceiveUpdate", function (message) {
+                // Show notification banner if it exists, otherwise reload
+                var banner = document.getElementById("realtime-notification");
+                if (banner) {
+                    banner.style.display = "block";
+                } else {
+                    location.reload();
+                }
+            });
+        }
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

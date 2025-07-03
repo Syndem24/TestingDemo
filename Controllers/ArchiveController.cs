@@ -118,5 +118,51 @@ namespace TestingDemo.Controllers
 
             return View(client);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestData(string sortOrder, string currentFilter, string searchString, int? pageNumber, string TypeOfProject, string CreatedDateFrom, string CreatedDateTo)
+        {
+            var clients = from c in _context.Clients
+                          where c.Status == "Archived"
+                          select c;
+            if (!string.IsNullOrEmpty(searchString))
+                clients = clients.Where(s => s.ClientName.Contains(searchString));
+            if (!string.IsNullOrEmpty(TypeOfProject))
+                clients = clients.Where(s => s.TypeOfProject == TypeOfProject);
+            if (!string.IsNullOrEmpty(CreatedDateFrom) && DateTime.TryParse(CreatedDateFrom, out var createdDateFrom))
+                clients = clients.Where(s => s.CreatedDate.Date >= createdDateFrom.Date);
+            if (!string.IsNullOrEmpty(CreatedDateTo) && DateTime.TryParse(CreatedDateTo, out var createdDateTo))
+                clients = clients.Where(s => s.CreatedDate.Date <= createdDateTo.Date);
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    clients = clients.OrderByDescending(s => s.ClientName);
+                    break;
+                case "Date":
+                    clients = clients.OrderBy(s => s.CreatedDate);
+                    break;
+                case "date_desc":
+                    clients = clients.OrderByDescending(s => s.CreatedDate);
+                    break;
+                case "Type":
+                    clients = clients.OrderBy(s => s.TypeOfProject);
+                    break;
+                case "type_desc":
+                    clients = clients.OrderByDescending(s => s.TypeOfProject);
+                    break;
+                case "Status":
+                    clients = clients.OrderBy(s => s.Status);
+                    break;
+                case "status_desc":
+                    clients = clients.OrderByDescending(s => s.Status);
+                    break;
+                default:
+                    clients = clients.OrderBy(s => s.CreatedDate);
+                    break;
+            }
+            int pageSize = 10;
+            var paginated = await TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>.CreateAsync(clients.AsNoTracking(), pageNumber ?? 1, pageSize);
+            return Json(paginated);
+        }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TestingDemo.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TestingDemo.Controllers
 {
@@ -12,10 +13,12 @@ namespace TestingDemo.Controllers
     public class PlanningOfficerController : BaseController
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public PlanningOfficerController(ApplicationDbContext context)
+        public PlanningOfficerController(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: PlanningOfficer/Index
@@ -204,6 +207,7 @@ namespace TestingDemo.Controllers
 
                     _context.PermitRequirements.Add(requirement);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
                     TempData["SuccessMessage"] = "Requirement added successfully!";
                     return RedirectToAction("PlanRequirements", new { id = requirement.ClientId });
@@ -286,6 +290,7 @@ namespace TestingDemo.Controllers
                 {
                     _context.Update(requirement);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
                     TempData["SuccessMessage"] = "Requirement updated successfully!";
                 }
@@ -321,6 +326,7 @@ namespace TestingDemo.Controllers
                 int clientId = requirement.ClientId;
                 _context.PermitRequirements.Remove(requirement);
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
                 TempData["SuccessMessage"] = "Requirement deleted successfully!";
                 return RedirectToAction("PlanRequirements", new { id = clientId });
@@ -340,6 +346,7 @@ namespace TestingDemo.Controllers
             {
                 client.Status = "Completed";
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
                 TempData["SuccessMessage"] = "Requirements planning completed successfully!";
             }
@@ -362,6 +369,7 @@ namespace TestingDemo.Controllers
                 // Update completion status
                 requirement.IsCompleted = isCompleted;
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
                 return Json(new { success = true });
             }
@@ -384,6 +392,7 @@ namespace TestingDemo.Controllers
 
             client.Status = "Liaison"; // Status updated to Liaison
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
             TempData["SuccessMessage"] = $"Client {client.ClientName} has been proceeded to Liaison.";
             return RedirectToAction("Index");
@@ -400,9 +409,29 @@ namespace TestingDemo.Controllers
                 client.Status = "Pending"; // Changed from "Finance" to "Pending"
                 client.PlanningReturnNote = note; // Save the note for Finance to see
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
                 TempData["SuccessMessage"] = $"Client returned to Finance's pending list. Note: {note}";
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestData(int? pageNumber)
+        {
+            int pageSize = 10;
+            var clientsQuery = _context.Clients
+                .Where(c => c.Status == "Planning")
+                .AsNoTracking()
+                .OrderBy(c => c.CreatedDate);
+            var paginatedClients = await PaginatedList<ClientModel>.CreateAsync(clientsQuery, pageNumber ?? 1, pageSize);
+            var clientIds = paginatedClients.Select(c => c.Id).ToList();
+            var requirements = await _context.PermitRequirements
+                .Where(r => clientIds.Contains(r.ClientId))
+                .ToListAsync();
+            var requirementsByClient = requirements
+                .GroupBy(r => r.ClientId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            return Json(new { Clients = paginatedClients, RequirementsByClient = requirementsByClient });
         }
 
         private bool RequirementExists(int id)

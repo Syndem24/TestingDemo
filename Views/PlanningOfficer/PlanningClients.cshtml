@@ -276,5 +276,19 @@
         $(function () {
             $('[data-bs-toggle="tooltip"]').tooltip();
         });
+
+        function renderPlanningClients(data) {
+            // TODO: Update the planning clients table DOM with new data
+            location.reload(); // Placeholder: reload page for now
+        }
+        if (window.connection) {
+            connection.on("ReceiveUpdate", function (message) {
+                fetch('/PlanningOfficer/GetLatestData')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderPlanningClients(data);
+                    });
+            });
+        }
     </script>
 }
