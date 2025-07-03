@@ -203,5 +203,48 @@ namespace TestingDemo.Controllers
             };
             return Json(viewModel);
         }
+
+        [Authorize(Roles = "Admin,CustomerCare")]
+        public async Task<IActionResult> TrackingNumbers(string sortOrder)
+        {
+            ViewData["TrackingSortParm"] = String.IsNullOrEmpty(sortOrder) ? "tracking_desc" : "";
+            ViewData["NameSortParm"] = sortOrder == "Name" ? "name_desc" : "Name";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+
+            var clients = _context.Clients.AsQueryable();
+
+            switch (sortOrder)
+            {
+                case "tracking_desc":
+                    clients = clients.OrderByDescending(c => c.TrackingNumber);
+                    break;
+                case "Name":
+                    clients = clients.OrderBy(c => c.ClientName);
+                    break;
+                case "name_desc":
+                    clients = clients.OrderByDescending(c => c.ClientName);
+                    break;
+                case "Date":
+                    clients = clients.OrderBy(c => c.CreatedDate);
+                    break;
+                case "date_desc":
+                    clients = clients.OrderByDescending(c => c.CreatedDate);
+                    break;
+                default:
+                    clients = clients.OrderByDescending(c => c.CreatedDate);
+                    break;
+            }
+
+            var result = await clients.Select(c => new
+            {
+                c.ClientName,
+                c.TypeOfProject,
+                c.Status,
+                c.TrackingNumber,
+                c.CreatedDate
+            }).ToListAsync();
+
+            return View(result);
+        }
     }
 }

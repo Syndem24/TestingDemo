@@ -1,7 +1,7 @@
 @model TestingDemo.Models.PaginatedList<TestingDemo.Models.ClientModel>
 
 <div class="table-responsive">
-    <table class="table table-hover table-striped mb-0">
+    <table class="table table-hover table-striped mb-0 align-middle">
         <thead class="table-light">
             <tr>
                 <th>Client Details</th>
@@ -29,14 +29,14 @@
                         }
                     </td>
                     <td class="text-center align-middle">
-                        <div class="btn-group btn-group-sm">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary"
+                        <div class="btn-group btn-group-sm d-flex flex-wrap flex-md-nowrap gap-1 gap-md-0 w-100">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary flex-fill"
                                 title="View"><i class="bi bi-eye"></i></a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Edit"><i
-                                    class="bi bi-pencil"></i></a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary flex-fill"
+                                title="Edit"><i class="bi bi-pencil"></i></a>
                             @if (item.Status == "Pending" || item.Status == "Finance")
                             {
-                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-outline-success flex-fill" data-bs-toggle="modal"
                                     data-bs-target="#sendToPlanningModal" data-client-id="@item.Id"
                                     data-client-name="@item.ClientName" title="Send to Planning">
                                     <i class="bi bi-send"></i>
@@ -46,11 +46,11 @@
                             {
                                 <form asp-action="ReturnToDocumentOfficer" asp-route-id="@item.Id" method="post"
                                     style="display:inline;">
-                                    <button type="submit" class="btn btn-warning" title="Return to Document Officer">
+                                    <button type="submit" class="btn btn-warning flex-fill" title="Return to Document Officer">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                     </button>
                                 </form>
-                                <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-outline-dark flex-fill" data-bs-toggle="modal"
                                     data-bs-target="#archiveModal" data-client-id="@item.Id" data-client-name="@item.ClientName"
                                     title="Archive Client">
                                     <i class="bi bi-archive"></i>

@@ -37,6 +37,10 @@
     <div class="text-center mt-3">
         <a href="/Account/ForgotPassword" class="btn btn-link">Forgot Password?</a>
     </div>
+    <div class="text-center mt-2">
+        <a href="/Home/TrackRequest" class="btn btn-outline-primary w-100 mt-2"><i class="bi bi-search"></i> Track Your
+            Request (No Login Required)</a>
+    </div>
 </div>
 
 <!-- JavaScript Function to Toggle Password Visibility -->
@@ -249,5 +253,54 @@
         margin-bottom: 20px;
         font-size: 14px;
         border-left: 4px solid #d32f2f;
+    }
+
+    /* Dark mode overrides */
+    body.dark-mode .login-container {
+        background: #23272b !important;
+        color: #e8e6e3 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode .login-container h2 {
+        color: #e8e6e3 !important;
+    }
+
+    body.dark-mode .login-form input,
+    body.dark-mode .login-form label {
+        background: #23272b !important;
+        color: #e8e6e3 !important;
+        border-color: #444 !important;
+    }
+
+    body.dark-mode .login-form input:focus {
+        border-color: #4A90E2 !important;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    body.dark-mode .btn-login {
+        background: #375a7f !important;
+        color: #fff !important;
+        border: none;
+    }
+
+    body.dark-mode .btn-login:hover {
+        background: #274060 !important;
+    }
+
+    body.dark-mode .btn-link,
+    body.dark-mode .btn-outline-primary {
+        background: #23272b !important;
+        color: #e8e6e3 !important;
+        border-color: #444 !important;
+    }
+
+    body.dark-mode .btn-outline-primary:hover {
+        background: #375a7f !important;
+        color: #fff !important;
+    }
+
+    body.dark-mode .error-message {
+        color: #ff6b6b !important;
     }
 </style>

@@ -105,7 +105,9 @@ namespace TestingDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClientModel client)
         {
-            // Debug: capture all posted form keys and values
+            // Remove TrackingNumber from validation since it will be set in code
+            ModelState.Remove("TrackingNumber");
+
             ViewBag.PostedForm = Request.Form.Keys.ToDictionary(k => k, k => Request.Form[k]);
 
             if (string.IsNullOrEmpty(client.TaxId))
@@ -186,7 +188,6 @@ namespace TestingDemo.Controllers
                     break;
             }
 
-            // In Create POST action, after binding project-type-specific data and before ModelState.IsValid:
             client.OtherTypeOfProject = Request.Form["OtherTypeOfProject"];
             client.OtherRequestingParty = Request.Form["OtherRequestingParty"];
 
@@ -194,14 +195,14 @@ namespace TestingDemo.Controllers
             {
                 client.CreatedDate = DateTime.Now;
                 client.Status = "Pending";
-
+                // Generate unique tracking number
+                client.TrackingNumber = await GenerateUniqueTrackingNumber();
                 _context.Add(client);
                 await _context.SaveChangesAsync();
                 await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "Finance data changed");
                 TempData["SuccessMessage"] = "Client created successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            // Add debug output for ModelState errors
             ViewBag.DebugErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return View(client);
         }
@@ -482,6 +483,19 @@ namespace TestingDemo.Controllers
         private bool ClientExists(int id)
         {
             return _context.Clients.Any(e => e.Id == id);
+        }
+
+        private async Task<string> GenerateUniqueTrackingNumber()
+        {
+            var rand = new Random();
+            string letters() => new string(Enumerable.Range(0, 4).Select(_ => (char)rand.Next('A', 'Z' + 1)).ToArray());
+            string digits() => rand.Next(0, 1000000).ToString("D6");
+            string tracking;
+            do
+            {
+                tracking = $"{letters()}-{digits()}";
+            } while (await _context.Clients.AnyAsync(c => c.TrackingNumber == tracking));
+            return tracking;
         }
     }
 }

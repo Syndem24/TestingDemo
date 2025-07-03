@@ -56,5 +56,10 @@ namespace TestingDemo.Models
 
         public string? OtherTypeOfProject { get; set; }
         public string? OtherRequestingParty { get; set; }
+
+        // Unique tracking number for client-side tracking
+        [Required]
+        [RegularExpression(@"^[A-Z]{4}-\d{6}$", ErrorMessage = "Tracking number must be in the format AWYZ-078923")]
+        public string TrackingNumber { get; set; }
     }
 }

@@ -26,6 +26,7 @@ public class AccountController : BaseController
         _hubContext = hubContext;
     }
 
+    [AllowAnonymous]
     public IActionResult Login()
     {
         if (TempData["Success"] != null)
@@ -34,6 +35,7 @@ public class AccountController : BaseController
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
@@ -58,6 +60,7 @@ public class AccountController : BaseController
         return View();
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();

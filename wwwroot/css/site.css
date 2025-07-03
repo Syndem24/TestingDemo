@@ -203,29 +203,69 @@ body {
 }
 
 @media (max-width: 768px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
   .dashboard-grid {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "liaison"
-      "finance"
-      "received"
-      "planning"
-      "documentation";
+    gap: 12px;
   }
 
   .dashboard-grid-item {
-    min-height: 250px;
+    margin-bottom: 8px;
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-grid {
+    gap: 8px;
+  }
+
+  .dashboard-grid-item {
+    border-radius: 8px;
+    min-height: 120px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
   }
 
   .dashboard-title {
-    font-size: 1rem;
-    padding: 10px 0;
+    font-size: 0.95rem;
+    padding: 7px 0;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .dashboard-table {
+    font-size: 0.7rem;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
+
+  .dashboard-table thead,
+  .dashboard-table tbody {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
   }
 
   .dashboard-table th,
   .dashboard-table td {
-    padding: 6px 8px;
-    font-size: 0.8rem;
+    padding: 4px 4px;
+    font-size: 0.7rem;
+    min-width: 80px;
+    white-space: nowrap;
+  }
+
+  .dashboard-table th:nth-child(3),
+  .dashboard-table td:nth-child(3) {
+    display: none;
+  }
+
+  .dashboard-table th:nth-child(1),
+  .dashboard-table td:nth-child(1),
+  .dashboard-table th:nth-child(2),
+  .dashboard-table td:nth-child(2) {
+    width: 50%;
   }
 }
 
@@ -252,6 +292,10 @@ body {
   .dashboard-table td:nth-child(2) {
     width: 50%;
   }
+
+  .dashboard-grid-item {
+    margin-bottom: 14px;
+  }
 }
 
 /* No Data Message */
@@ -259,4 +303,19 @@ body {
   color: #6c757d;
   font-style: italic;
   text-align: center;
+}
+
+/* Responsive styles for Finance client table */
+@media (max-width: 576px) {
+  .table-responsive .btn-group .btn {
+    min-width: 40px;
+    font-size: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    white-space: normal;
+  }
 }

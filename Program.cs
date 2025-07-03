@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 

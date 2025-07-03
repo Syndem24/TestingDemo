@@ -60,5 +60,30 @@ namespace TestingDemo.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult TrackRequest()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> TrackRequest(string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber))
+            {
+                ViewBag.Error = "Please enter your tracking number.";
+                return View();
+            }
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.TrackingNumber == trackingNumber);
+            if (client == null)
+            {
+                ViewBag.Error = "Tracking number not found. Please check and try again.";
+                return View();
+            }
+            return View("TrackResult", client);
+        }
     }
 }
