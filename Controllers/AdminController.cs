@@ -110,8 +110,8 @@ public class AdminController : Controller
             userViewModels.Add(new UserViewModel
             {
                 Id = user.Id,
-                Email = user.Email,
-                FullName = user.FullName,
+                Email = user.Email ?? string.Empty,
+                FullName = user.FullName ?? string.Empty,
                 Role = roles.FirstOrDefault() ?? "No Role"
             });
         }
@@ -128,16 +128,16 @@ public class AdminController : Controller
         var model = new UserViewModel
         {
             Id = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName ?? string.Empty,
             Age = user.Age,
             BirthDate = user.BirthDate,
-            Address = user.Address,
-            City = user.City,
-            State = user.State,
-            ZipCode = user.ZipCode,
-            Country = user.Country,
-            Role = roles.FirstOrDefault()
+            Address = user.Address ?? string.Empty,
+            City = user.City ?? string.Empty,
+            State = user.State ?? string.Empty,
+            ZipCode = user.ZipCode ?? string.Empty,
+            Country = user.Country ?? string.Empty,
+            Role = roles.FirstOrDefault() ?? "No Role"
         };
 
         return View(model);
@@ -152,16 +152,16 @@ public class AdminController : Controller
         var model = new UserViewModel
         {
             Id = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName ?? string.Empty,
             Age = user.Age,
             BirthDate = user.BirthDate,
-            Address = user.Address,
-            City = user.City,
-            State = user.State,
-            ZipCode = user.ZipCode,
-            Country = user.Country,
-            Role = roles.FirstOrDefault()
+            Address = user.Address ?? string.Empty,
+            City = user.City ?? string.Empty,
+            State = user.State ?? string.Empty,
+            ZipCode = user.ZipCode ?? string.Empty,
+            Country = user.Country ?? string.Empty,
+            Role = roles.FirstOrDefault() ?? "No Role"
         };
 
         ViewBag.Roles = new SelectList((await _roleManager.Roles.Select(r => r.Name).ToListAsync()).Where(r => r != "Accountant"));
@@ -185,7 +185,8 @@ public class AdminController : Controller
 
         var existingRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, existingRoles);
-        await _userManager.AddToRoleAsync(user, model.Role);
+        if (!string.IsNullOrEmpty(model.Role))
+            await _userManager.AddToRoleAsync(user, model.Role);
 
         await _userManager.UpdateAsync(user);
         return RedirectToAction("Users");
@@ -225,9 +226,9 @@ public class AdminController : Controller
         var viewModel = new UserViewModel
         {
             Id = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
-            Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName ?? string.Empty,
+            Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "No Role"
         };
 
         return View(viewModel);
@@ -267,8 +268,8 @@ public class AdminController : Controller
             userViewModels.Add(new UserViewModel
             {
                 Id = user.Id,
-                Email = user.Email,
-                FullName = user.FullName,
+                Email = user.Email ?? string.Empty,
+                FullName = user.FullName ?? string.Empty,
                 Role = roles.FirstOrDefault() ?? "No Role"
             });
         }
