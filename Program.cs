@@ -153,4 +153,3 @@ async Task CreateAdminUserAsync(IServiceProvider serviceProvider)
     }
 }
 
-
