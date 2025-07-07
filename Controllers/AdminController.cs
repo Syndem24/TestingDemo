@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TestingDemo.ViewModels;
 using TestingDemo.Models; // Add this for ApplicationUser
 using Microsoft.AspNetCore.SignalR;
+using TestingDemo.Data;
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller

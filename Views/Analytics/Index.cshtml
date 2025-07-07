@@ -1,219 +1,15 @@
 @model TestingDemo.ViewModels.AnalyticsViewModel
 @{
-    ViewData["Title"] = "Analytics Dashboard";
+    ViewData["Title"] = "Expense Analytics";
 }
 <div class="container py-4">
-    <h2 class="mb-4"><i class="bi bi-bar-chart"></i> Analytics Dashboard</h2>
-    <!-- Filter Dropdown Button -->
-    <div class="mb-3">
-        <button class="btn btn-outline-primary d-inline-flex align-items-center" type="button" data-bs-toggle="collapse"
-            data-bs-target="#analyticsFilterCollapse" aria-expanded="false" aria-controls="analyticsFilterCollapse">
-            <i class="bi bi-funnel me-1"></i> Show Filters
-        </button>
-    </div>
-    <div class="collapse d-lg-block" id="analyticsFilterCollapse">
-        <form class="row row-cols-1 row-cols-md-4 g-2 mb-4 align-items-end" method="get" asp-action="Index"
-            asp-controller="Analytics">
-            <div class="col">
-                <label for="startDate" class="form-label">Start Date</label>
-                <input type="date" class="form-control form-control-sm" id="startDate" name="startDate"
-                    value="@Context.Request.Query["startDate"]">
-            </div>
-            <div class="col">
-                <label for="endDate" class="form-label">End Date</label>
-                <input type="date" class="form-control form-control-sm" id="endDate" name="endDate"
-                    value="@Context.Request.Query["endDate"]">
-            </div>
-            <div class="col">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select form-select-sm" id="status" name="status">
-                    <option value="">All</option>
-                    @foreach (var s in Model.AllStatuses ?? new List<string>())
-                    {
-                        @if (Context.Request.Query["status"] == s)
-                        {
-                            <option value="@s" selected>@s</option>
-                        }
-                        else
-                        {
-                            <option value="@s">@s</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="col">
-                <label for="projectType" class="form-label">Project Type</label>
-                <select class="form-select form-select-sm" id="projectType" name="projectType">
-                    <option value="">All</option>
-                    @foreach (var type in Model.AllProjectTypes ?? new List<string>())
-                    {
-                        @if (Context.Request.Query["projectType"] == type)
-                        {
-                            <option value="@type" selected>@type</option>
-                        }
-                        else
-                        {
-                            <option value="@type">@type</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="col">
-                <label for="urgency" class="form-label">Urgency</label>
-                <select class="form-select form-select-sm" id="urgency" name="urgency">
-                    <option value="">All</option>
-                    @foreach (var u in Model.AllUrgencies ?? new List<string>())
-                    {
-                        @if (Context.Request.Query["urgency"] == u)
-                        {
-                            <option value="@u" selected>@u</option>
-                        }
-                        else
-                        {
-                            <option value="@u">@u</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="col">
-                <label for="supplierName" class="form-label">Supplier Name</label>
-                <input type="text" class="form-control form-control-sm" id="supplierName" name="supplierName"
-                    value="@Context.Request.Query["supplierName"]">
-            </div>
-            <div class="col">
-                <label for="businessType" class="form-label">Business Type</label>
-                <input type="text" class="form-control form-control-sm" id="businessType" name="businessType"
-                    value="@Context.Request.Query["businessType"]">
-            </div>
-            <div class="col">
-                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Filter</button>
-            </div>
-        </form>
-    </div>
+    <h2 class="mb-4"><i class="bi bi-bar-chart"></i> Expense Analytics Dashboard</h2>
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card text-bg-primary h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Clients</h5>
-                    <h2 class="card-text">@Model.TotalClients</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-success h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Permit Completion Rate</h5>
-                    <h2 class="card-text">@Model.PermitCompletionRate.ToString("F1")% </h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-info h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Most Common Status</h5>
-                    <h2 class="card-text">@Model.ClientsByStatus.OrderByDescending(x => x.Value).FirstOrDefault().Key
-                    </h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-warning h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Most Common Project Type</h5>
-                    <h2 class="card-text">@Model.ClientsByType.OrderByDescending(x => x.Value).FirstOrDefault().Key</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card text-bg-secondary h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Vendors</h5>
-                    <h2 class="card-text">@Model.TotalVendors</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-success h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Approved Vendors</h5>
-                    <h2 class="card-text">@Model.ApprovedVendors</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-dark h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total External Audits</h5>
-                    <h2 class="card-text">@Model.TotalExternalAudits</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-info h-100">
-                <div class="card-body">
-                    <h5 class="card-title">External Audit Completion Rate</h5>
-                    <h2 class="card-text">@Model.ExternalAuditCompletionRate.ToString("F1")% </h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Clients by Status</div>
-                <div class="card-body">
-                    <canvas id="statusChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Clients by Project Type</div>
-                <div class="card-body">
-                    <canvas id="typeChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Clients by Urgency</div>
-                <div class="card-body">
-                    <canvas id="urgencyChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card mb-4">
-        <div class="card-header bg-light fw-bold">Monthly Client Trends</div>
-        <div class="card-body">
-            <canvas id="monthlyChart" height="100"></canvas>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Urgent Requests Trend</div>
-                <div class="card-body">
-                    <canvas id="urgentTrendChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Forecast: Next Month's Projects</div>
-                <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                    <h1 class="display-4">@Model.ForecastNextMonthProjects</h1>
-                    <div class="text-muted">(Predicted)</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Requests Heatmap</div>
-                <div class="card-body">
-                    <canvas id="heatmapChart" height="200"></canvas>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Expenses</h5>
+                    <h2 class="card-text">₱@Model.TotalExpenses.ToString("N2")</h2>
                 </div>
             </div>
         </div>
@@ -221,118 +17,131 @@
     <div class="row g-4 mb-4">
         <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Approval Funnel / Conversion Rate</div>
+                <div class="card-header bg-light fw-bold">Monthly Expense Trend</div>
                 <div class="card-body">
-                    <canvas id="approvalFunnelChart" height="200"></canvas>
-                    <div class="mt-3">
-                        <span class="me-3">Submitted→In Progress: <b>@Model.ApprovalFunnelRates["Submitted→In Progress"].ToString("F1")%</b></span>
-                        <span>In Progress→Approved: <b>@Model.ApprovalFunnelRates["In Progress→Approved"].ToString("F1")%</b></span>
-                    </div>
+                    <canvas id="expenseMonthChart" height="200"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100 text-bg-info">
-                <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                    <h5 class="card-title">Client Repeat Rate (last 6 months)</h5>
-                    <h1 class="display-4">@Model.ClientRepeatRate</h1>
-                    <div class="text-muted">Clients with >1 request</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-md-8">
+        <div class="col-md-3">
             <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Upcoming External Audit Deadlines</div>
+                <div class="card-header bg-light fw-bold">Expenses by Category</div>
                 <div class="card-body">
-                    <canvas id="auditDeadlineTimeline" height="120"></canvas>
+                    <canvas id="expenseCategoryChart" height="200"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card h-100">
-                <div class="card-header bg-light fw-bold">Projects by Client Type & Status</div>
+                <div class="card-header bg-light fw-bold">Expenses by Status</div>
                 <div class="card-body">
-                    <canvas id="stackedClientTypeStatusChart" height="200"></canvas>
+                    <canvas id="expenseStatusChart" height="200"></canvas>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Export/Report Buttons -->
-    <div class="mb-3 d-flex flex-wrap gap-2">
-        <form method="get" asp-action="ExportExcel" asp-controller="Analytics">
-            @* Hidden fields for filters *@
-            <input type="hidden" name="startDate" value="@Context.Request.Query["startDate"]" />
-            <input type="hidden" name="endDate" value="@Context.Request.Query["endDate"]" />
-            <input type="hidden" name="status" value="@Context.Request.Query["status"]" />
-            <input type="hidden" name="projectType" value="@Context.Request.Query["projectType"]" />
-            <input type="hidden" name="urgency" value="@Context.Request.Query["urgency"]" />
-            <input type="hidden" name="supplierName" value="@Context.Request.Query["supplierName"]" />
-            <input type="hidden" name="businessType" value="@Context.Request.Query["businessType"]" />
-            <button type="submit" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export to
-                Excel</button>
-        </form>
-        <form method="get" asp-action="ExportPdf" asp-controller="Analytics">
-            <input type="hidden" name="startDate" value="@Context.Request.Query["startDate"]" />
-            <input type="hidden" name="endDate" value="@Context.Request.Query["endDate"]" />
-            <input type="hidden" name="status" value="@Context.Request.Query["status"]" />
-            <input type="hidden" name="projectType" value="@Context.Request.Query["projectType"]" />
-            <input type="hidden" name="urgency" value="@Context.Request.Query["urgency"]" />
-            <input type="hidden" name="supplierName" value="@Context.Request.Query["supplierName"]" />
-            <input type="hidden" name="businessType" value="@Context.Request.Query["businessType"]" />
-            <button type="submit" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Export to PDF</button>
-        </form>
-        <form method="get" asp-action="MonthlyReport" asp-controller="Analytics">
-            <input type="hidden" name="month" value="@DateTime.Now.ToString("yyyy-MM")" />
-            <button type="submit" class="btn btn-primary"><i class="bi bi-calendar3"></i> Generate Monthly
-                Report</button>
-        </form>
-    </div>
-    <!-- Drill-down Filter Feedback -->
-    <div id="drilldown-active-filter" class="alert alert-info d-none mb-2"></div>
-    <!-- Hidden JSON for all filtered clients -->
-    <script id="filteredClientsJson" type="application/json">
-        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FilteredClients ?? new List<TestingDemo.Models.ClientModel>()))
-    </script>
-    <!-- Drill-down Table Section -->
     <div class="card mt-4">
-        <div class="card-header bg-light fw-bold">Filtered Client Details</div>
+        <div class="card-header bg-light fw-bold">All Expenses</div>
         <div class="card-body p-0 table-responsive">
-            <div id="drilldown-table-container"></div>
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Recurring</th>
+                        <th>Paid Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.AllExpenses)
+                    {
+                        <tr>
+                            <td>@e.Name</td>
+                            <td>₱@e.Amount.ToString("N2")</td>
+                            <td>@e.DueDate.ToString("yyyy-MM-dd")</td>
+                            <td>@e.Status</td>
+                            <td>@e.Category</td>
+                            <td>@e.Location</td>
+                            <td>@(e.Recurring ? "Yes" : "No")</td>
+                            <td>@(e.PaidDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
-<audio id="notifySound" src="/sounds/Notifications.mp3" preload="auto"></audio>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Store initial client IDs for Analytics (using FilteredClients)
-        let analyticsClientIds = (@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FilteredClients.Select(c => c.Id.ToString()).ToList())));
-        function playNotifySound() {
-            var audio = document.getElementById('notifySound');
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play();
+        // Prepare data for charts
+        const expensesByMonth = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpensesByMonth));
+        const expensesByCategory = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpensesByCategory));
+        const expensesByStatus = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpensesByStatus));
+
+        // Monthly Trend Chart
+        const monthCtx = document.getElementById('expenseMonthChart').getContext('2d');
+        new Chart(monthCtx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(expensesByMonth),
+                datasets: [{
+                    label: 'Total Expenses',
+                    data: Object.values(expensesByMonth),
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
             }
-        }
-        function renderAnalytics(data) {
-            let newIds = (data.FilteredClients || []).map(c => c.id?.toString());
-            let isNew = newIds.some(id => !analyticsClientIds.includes(id));
-            if (isNew) {
-                playNotifySound();
+        });
+
+        // Category Chart
+        const catCtx = document.getElementById('expenseCategoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(expensesByCategory),
+                datasets: [{
+                    label: 'Expenses by Category',
+                    data: Object.values(expensesByCategory),
+                    backgroundColor: [
+                        '#0d6efd', '#ffc107', '#198754', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#0dcaf0', '#adb5bd', '#212529'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
             }
-            location.reload();
-        }
-        if (window.connection) {
-            connection.on("ReceiveUpdate", function (message) {
-                fetch('/Analytics/GetLatestData')
-                    .then(response => response.json())
-                    .then(data => {
-                        renderAnalytics(data);
-                    });
-            });
-        }
+        });
+
+        // Status Chart
+        const statusCtx = document.getElementById('expenseStatusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(expensesByStatus),
+                datasets: [{
+                    label: 'Expenses by Status',
+                    data: Object.values(expensesByStatus),
+                    backgroundColor: [
+                        '#198754', '#ffc107', '#dc3545', '#6c757d'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
     </script>
-    <script src="~/js/analytics-charts.js"></script>
 }

@@ -8,6 +8,7 @@ using TestingDemo.Models;
 using TestingDemo.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using TestingDemo.Data;
 
 namespace TestingDemo.Controllers
 {

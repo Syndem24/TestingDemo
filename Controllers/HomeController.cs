@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using TestingDemo.Models;
+using TestingDemo.Data;
 
 namespace TestingDemo.Controllers
 {

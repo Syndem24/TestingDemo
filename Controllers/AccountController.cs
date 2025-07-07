@@ -9,6 +9,7 @@ using TestingDemo.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using TestingDemo.Data;
 
 public class AccountController : BaseController
 {

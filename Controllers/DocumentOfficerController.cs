@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TestingDemo.Models;
 using Microsoft.AspNetCore.SignalR;
+using TestingDemo.Data;
 
 namespace TestingDemo.Controllers
 {

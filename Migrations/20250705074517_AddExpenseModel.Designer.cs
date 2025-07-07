@@ -12,8 +12,8 @@ using TestingDemo.Data;
 namespace TestingDemo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250630144416_AddOtherFieldsToClient")]
-    partial class AddOtherFieldsToClient
+    [Migration("20250705074517_AddExpenseModel")]
+    partial class AddExpenseModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,6 +101,9 @@ namespace TestingDemo.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ContactPersonNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
@@ -113,6 +116,9 @@ namespace TestingDemo.Migrations
 
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -374,6 +380,10 @@ namespace TestingDemo.Migrations
                     b.Property<string>("TaxId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TrackingNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TypeOfProject")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -393,6 +403,47 @@ namespace TestingDemo.Migrations
                     b.HasIndex("RetainershipSPPId");
 
                     b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.Expense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PaidDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Recurring")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("TestingDemo.Models.ExternalAuditModel", b =>

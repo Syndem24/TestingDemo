@@ -42,5 +42,11 @@ namespace TestingDemo.ViewModels
         public Dictionary<string, double> ApprovalFunnelRates { get; set; }
         // Client repeat rate
         public int ClientRepeatRate { get; set; }
+        // Expense analytics
+        public decimal TotalExpenses { get; set; }
+        public Dictionary<string, decimal> ExpensesByMonth { get; set; }
+        public Dictionary<string, decimal> ExpensesByCategory { get; set; }
+        public Dictionary<string, decimal> ExpensesByStatus { get; set; }
+        public List<TestingDemo.Models.ExpenseModel> AllExpenses { get; set; }
     }
 }

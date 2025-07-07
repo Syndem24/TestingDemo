@@ -8,6 +8,7 @@ using TestingDemo.Models;
 using TestingDemo.ViewModels;
 using ClosedXML.Excel;
 using System.Collections.Generic;
+using TestingDemo.Data;
 
 namespace TestingDemo.Controllers
 {
@@ -114,6 +115,19 @@ namespace TestingDemo.Controllers
                 .GroupBy(c => c.ClientName)
                 .Count(g => g.Count() > 1);
 
+            // Expense analytics
+            var expenses = await _context.Expenses.ToListAsync();
+            var totalExpenses = expenses.Sum(e => e.Amount);
+            var expensesByMonth = expenses
+                .GroupBy(e => e.DueDate.ToString("yyyy-MM"))
+                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+            var expensesByCategory = expenses
+                .GroupBy(e => string.IsNullOrEmpty(e.Category) ? "Uncategorized" : e.Category)
+                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+            var expensesByStatus = expenses
+                .GroupBy(e => e.Status)
+                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+
             var viewModel = new AnalyticsViewModel
             {
                 TotalClients = clients.Count,
@@ -145,7 +159,12 @@ namespace TestingDemo.Controllers
                 StackedClientTypeStatusCounts = stackedCounts,
                 ApprovalFunnelCounts = approvalFunnelCounts,
                 ApprovalFunnelRates = approvalFunnelRates,
-                ClientRepeatRate = repeatClients
+                ClientRepeatRate = repeatClients,
+                TotalExpenses = totalExpenses,
+                ExpensesByMonth = expensesByMonth,
+                ExpensesByCategory = expensesByCategory,
+                ExpensesByStatus = expensesByStatus,
+                AllExpenses = expenses
             };
             return View(viewModel);
         }
