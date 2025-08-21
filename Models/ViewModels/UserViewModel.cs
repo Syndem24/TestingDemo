@@ -1,5 +1,4 @@
-namespace TestingDemo.ViewModels
-{
+using TestingDemo.Models;
     public class UserViewModel
     {
         public string Id { get; set; }
@@ -21,4 +20,3 @@ namespace TestingDemo.ViewModels
         public string NewPassword { get; set; }
         public string ConfirmPassword { get; set; }
     }
-}

@@ -12,8 +12,8 @@ using TestingDemo.Data;
 namespace TestingDemo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250707103818_missingTable")]
-    partial class missingTable
+    [Migration("20250821150815_cholofix")]
+    partial class cholofix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -426,6 +426,9 @@ namespace TestingDemo.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -499,6 +502,34 @@ namespace TestingDemo.Migrations
                     b.HasIndex("RecurringExpenseId");
 
                     b.ToTable("ExpensePayments");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.ExpensePaymentHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExpenseModelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseModelId");
+
+                    b.ToTable("ExpensePaymentHistories");
                 });
 
             modelBuilder.Entity("TestingDemo.Models.ExternalAuditModel", b =>
@@ -819,6 +850,17 @@ namespace TestingDemo.Migrations
                     b.Navigation("RecurringExpense");
                 });
 
+            modelBuilder.Entity("TestingDemo.Models.ExpensePaymentHistory", b =>
+                {
+                    b.HasOne("TestingDemo.Models.ExpenseModel", "Expense")
+                        .WithMany("PaymentHistory")
+                        .HasForeignKey("ExpenseModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Expense");
+                });
+
             modelBuilder.Entity("TestingDemo.Models.PermitRequirementModel", b =>
                 {
                     b.HasOne("TestingDemo.Models.ClientModel", "Client")
@@ -828,6 +870,11 @@ namespace TestingDemo.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("TestingDemo.Models.ExpenseModel", b =>
+                {
+                    b.Navigation("PaymentHistory");
                 });
 
             modelBuilder.Entity("TestingDemo.Models.RecurringExpense", b =>

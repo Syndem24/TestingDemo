@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering; // ✅ Add this line
 using Microsoft.EntityFrameworkCore;
-using TestingDemo.ViewModels;
 using TestingDemo.Models; // Add this for ApplicationUser
 using Microsoft.AspNetCore.SignalR;
 using TestingDemo.Data;

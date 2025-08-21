@@ -5,11 +5,11 @@ using System.Security.Claims;
 using System.Net;
 using System.Net.Mail;
 using System.Collections.Concurrent;
-using TestingDemo.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using TestingDemo.Data;
+using TestingDemo.Models;
 
 public class AccountController : BaseController
 {
@@ -27,7 +27,7 @@ public class AccountController : BaseController
         _hubContext = hubContext;
     }
 
-    [AllowAnonymous]
+    [AllowAnonymous] //Shows Login View
     public IActionResult Login()
     {
         if (TempData["Success"] != null)
@@ -35,7 +35,7 @@ public class AccountController : BaseController
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Handles Login
     [AllowAnonymous]
     public async Task<IActionResult> Login(string email, string password)
     {
@@ -61,25 +61,25 @@ public class AccountController : BaseController
         return View();
     }
 
-    [AllowAnonymous]
+    [AllowAnonymous] //Returns Login View after logout
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
         return RedirectToAction("Login");
     }
 
-    public IActionResult AccessDenied()
+    public IActionResult AccessDenied() //Shows access denied page
     {
         return View();
     }
 
-    public IActionResult Settings()
+    public IActionResult Settings() //Shows settings page
     {
         return View();
     }
-
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public class DashboardController : Controller
+
+    public class DashboardController : Controller //Nested Control, s       hows Dashboard view
     {
         public IActionResult Index()
         {
@@ -87,13 +87,13 @@ public class AccountController : BaseController
         }
     }
 
-    [HttpGet]
+    [HttpGet] //Shows ChangePassword View
     public IActionResult ChangePassword()
     {
         return View(new ChangePasswordViewModel());
     }
 
-    [HttpPost]
+    [HttpPost] //Main Logic for changing passwords
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -165,7 +165,7 @@ public class AccountController : BaseController
         return RedirectToAction("ConfirmChangePassword");
     }
 
-    [HttpGet]
+    [HttpGet] //Shows OTP Entry Page
     public IActionResult ConfirmChangePassword()
     {
         if (TempData["OtpNotice"] != null)
@@ -173,7 +173,7 @@ public class AccountController : BaseController
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Verifies OTP
     public async Task<IActionResult> ConfirmChangePassword(string otp)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -251,7 +251,7 @@ public class AccountController : BaseController
         return RedirectToAction("Settings");
     }
 
-    [HttpPost]
+    [HttpPost] //Generates and resets OTP email (with a 3-per-10 minute rate limit)
     public IActionResult ResendChangePasswordOtp()
     {
         var user = _userManager.GetUserAsync(User).Result;
@@ -313,14 +313,14 @@ public class AccountController : BaseController
         return RedirectToAction("ConfirmChangePassword");
     }
 
-    [HttpGet]
+    [HttpGet] //Shows ForgotPassword View
     [AllowAnonymous]
     public IActionResult ForgotPassword()
     {
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Handles ForgotPassword (Guest Mode)
     [AllowAnonymous]
     public async Task<IActionResult> ForgotPassword(string email)
     {
@@ -370,7 +370,7 @@ public class AccountController : BaseController
         return RedirectToAction("ResetPasswordOtp");
     }
 
-    [HttpGet]
+    [HttpGet] //Shows OTP Entry form (Guest Mode)
     [AllowAnonymous]
     public IActionResult ResetPasswordOtp()
     {
@@ -379,7 +379,7 @@ public class AccountController : BaseController
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Verifies OTP (Guest Mode)
     [AllowAnonymous]
     public IActionResult ResetPasswordOtp(string otp)
     {
@@ -405,7 +405,7 @@ public class AccountController : BaseController
         return RedirectToAction("ResetPasswordNew");
     }
 
-    [HttpGet]
+    [HttpGet] //Shows NewPassword View only when OTP is verified
     [AllowAnonymous]
     public IActionResult ResetPasswordNew()
     {
@@ -417,7 +417,7 @@ public class AccountController : BaseController
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Handles password reset
     [AllowAnonymous]
     public async Task<IActionResult> ResetPasswordNew(string newPassword, string confirmPassword)
     {
