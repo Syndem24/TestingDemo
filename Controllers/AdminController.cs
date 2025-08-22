@@ -34,7 +34,7 @@ public class AdminController : Controller
         return View();
     }
 
-    [HttpPost]
+    [HttpPost] //Adds Users, inquires credentials
     public async Task<IActionResult> AddUser(
         string email,
         string password,
@@ -173,7 +173,7 @@ public class AdminController : Controller
         return View(model);
     }
 
-    [HttpPost]
+    [HttpPost] //Edits user data
     public async Task<IActionResult> EditUser(UserViewModel model)
     {
         var user = await _userManager.FindByIdAsync(model.Id);
@@ -198,7 +198,7 @@ public class AdminController : Controller
         return RedirectToAction("Users");
     }
 
-    [HttpPost]
+    [HttpPost] //Deletes user
     public async Task<IActionResult> DeleteUser(string id)
     {
         var user = await _userManager.FindByIdAsync(id);

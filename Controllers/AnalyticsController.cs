@@ -12,7 +12,7 @@ using TestingDemo.Data;
 
 namespace TestingDemo.Controllers
 {
-    [Authorize(Roles = "Admin,Finance")]
+    [Authorize(Roles = "Admin,Finance")] //Roles that can do these tasks
     public class AnalyticsController : Controller
     {
         private readonly ApplicationDbContext _context;

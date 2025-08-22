@@ -15,15 +15,15 @@
 
     <form method="post" class="login-form">
         <div class="logo-login">
-            <img src="~/css/CPCPA.svg" alt="Logo">
+            <img src="~/css/CPCPA.svg" alt="Logo"> 
         </div>
         <div class="input-group">
-            <label for="email">Email:</label>
+            <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Enter your email" required />
         </div>
 
         <div class="input-group">
-            <label for="password">Password:</label>
+            <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required />
         </div>
         <!-- Show Password Checkbox (Fixed Alignment) -->
@@ -55,13 +55,14 @@
     .logo-login img{
         max-width: 100px;
         max-height: 100px;
+        margin-bottom: -20px;
     }
     .login-container {
         max-width: 400px;
         align-items: center;
         align-content: center;
-        margin: 50px auto;
-        padding: 20px;
+        margin: 30px auto;
+        padding: 10px;
         background: #ffffff;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         border-radius: 10px;
@@ -75,14 +76,14 @@
     }
 
     .input-group {
-        margin-bottom: 15px;
+        margin-bottom: 5px;
         text-align: left;
     }
 
     label {
         font-weight: bold;
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
         color: #555;
     }
 
@@ -149,7 +150,7 @@
     /* Login Page Styles */
     .login-container {
         max-width: 400px;
-        margin: 100px auto;
+        margin: 30px auto;
         padding: 30px;
         background-color: white;
         border-radius: 8px;
@@ -262,6 +263,10 @@
         background: #23272b !important;
         color: #e8e6e3 !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode .logo-login{
+        filter: invert(1);
     }
 
     body.dark-mode .login-container h2 {

@@ -16,6 +16,11 @@
       "type": "sqlite.local",
       "connectionId": "ATest",
       "dynamicId": null
+    },
+    "mssql2": {
+      "secretStore": "LocalSecretsFile",
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:MonsterASPDB"
     }
   }
 }

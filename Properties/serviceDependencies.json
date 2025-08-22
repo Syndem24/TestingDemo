@@ -13,6 +13,10 @@
       "type": "sqlite",
       "connectionId": "ATest",
       "dynamicId": null
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:MonsterASPDB"
     }
   }
 }

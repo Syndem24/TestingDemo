@@ -107,23 +107,30 @@
                                                     class="bi bi-people"></i> Manage Users</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="PendingApprovals"><i
                                                     class="bi bi-person-check"></i> Pending Approvals</a></li>
-                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
-                                                    class="bi bi-person-badge"></i> Customer Care</a></li>
-                                        <li><a class="dropdown-item" asp-controller="CustomerCare"
-                                                asp-action="TrackingNumbers"><i class="bi bi-hash"></i> Tracking Numbers</a>
-                                        </li>
                                         <li><a class="dropdown-item" asp-controller="Finance" asp-action="Index"><i
                                                     class="bi bi-cash-coin"></i> Finance</a></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index">
+                                                <i class="bi bi-clipboard-check"></i> Planning Officer
+                                            </a>
+                                        </li>
+                                        <li><a class="dropdown-item" asp-controller="CustomerCare" asp-action="Index"><i
+                                                    class="bi bi-person-badge"></i> Customer Care</a></li>                                    
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index">
+                                                <i class="bi bi-folder-check"></i> Document Officer
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="CustomerCare"
+                                               asp-action="TrackingNumbers"><i class="bi bi-hash"></i> Tracking Numbers</a>
+                                        </li>
                                         <li><a class="dropdown-item" asp-controller="Expense" asp-action="Index"><i
-                                                    class="bi bi-cash-stack"></i> Expense Tracking</a></li>
-                                        <li><a class="dropdown-item" asp-controller="DocumentOfficer" asp-action="Index"><i
-                                                    class="bi bi-folder-check"></i> Document Officer</a></li>
-                                        <li><a class="dropdown-item" asp-controller="PlanningOfficer" asp-action="Index"><i
-                                                    class="bi bi-clipboard-check"></i> Planning Officer</a></li>
+                                                    class="bi bi-cash-stack"></i> Expenses</a></li>                                                                            
                                         <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i
-                                                    class="bi bi-bar-chart"></i> Analytics</a></li>
+                                                    class="bi bi-bar-chart"></i>Analytics</a></li>
                                         <li><a class="dropdown-item" asp-controller="Archive" asp-action="Index"><i
-                                                    class="bi bi-archive-fill"></i> Archive</a></li>
+                                                    class="bi bi-archive-fill"></i> Archives</a></li>
                                     }
                                     else if (User.IsInRole("Finance"))
                                     {
