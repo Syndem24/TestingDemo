@@ -33,6 +33,7 @@
                         </div>
                         <div class="card-body">
                             <form asp-action="EditRequirement" method="post">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" asp-for="Id" />
                                 <input type="hidden" asp-for="ClientId" />
                                 <input type="hidden" asp-for="CreatedDate" />

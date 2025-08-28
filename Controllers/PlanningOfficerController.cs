@@ -32,8 +32,12 @@ namespace TestingDemo.Controllers
             int pageSize = 10;
             var clientsQuery = _context.Clients
                 .Where(c => c.Status == "Planning")
-                .AsNoTracking()
-                .OrderBy(c => c.CreatedDate);
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .OrderBy(c => c.CreatedDate)
+                .AsNoTracking();
 
             var paginatedClients = await PaginatedList<ClientModel>.CreateAsync(clientsQuery, pageNumber ?? 1, pageSize);
 
@@ -49,78 +53,19 @@ namespace TestingDemo.Controllers
             return View("PlanningClients", paginatedClients);
         }
 
-        // GET: PlanningOfficer/PlanningClients
-        public async Task<IActionResult> PlanningClients(int? pageNumber)
+        // GET: PlanningOfficer/PlanningClients (deprecated) -> Redirect to Index (Planning)
+        public IActionResult PlanningClients(int? pageNumber)
         {
-            ViewData["Title"] = "Pending Clients";
-            ViewData["ListTitle"] = "Pending Clients";
-            ViewData["CurrentAction"] = "PlanningClients";
-
-            int pageSize = 10;
-            var clientsQuery = _context.Clients
-                .Where(c => c.Status == "Pending" || c.Status == "Finance")
-                .AsNoTracking()
-                .OrderBy(c => c.CreatedDate);
-
-            var paginatedClients = await PaginatedList<ClientModel>.CreateAsync(clientsQuery, pageNumber ?? 1, pageSize);
-
-            var clientIds = paginatedClients.Select(c => c.Id).ToList();
-            var requirements = await _context.PermitRequirements
-                .Where(r => clientIds.Contains(r.ClientId))
-                .ToListAsync();
-
-            ViewBag.Requirements = requirements
-                .GroupBy(r => r.ClientId)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            return View(paginatedClients);
+            return RedirectToAction(nameof(Index), new { pageNumber });
         }
 
-        // GET: PlanningOfficer/CompletedClients
-        public async Task<IActionResult> CompletedClients(int? pageNumber)
+        // GET: PlanningOfficer/CompletedClients (deprecated) -> Redirect to Index (Planning)
+        public IActionResult CompletedClients(int? pageNumber)
         {
-            ViewData["Title"] = "Completed Clients";
-            ViewData["ListTitle"] = "Completed by Planning";
-            ViewData["CurrentAction"] = "CompletedClients"; // For navigation active state
-
-            int pageSize = 10;
-            var clientsQuery = _context.Clients
-                .Where(c => c.Status == "Completed")
-                .OrderBy(c => c.CreatedDate)
-                .AsNoTracking();
-
-            var paginatedClients = await PaginatedList<ClientModel>.CreateAsync(clientsQuery, pageNumber ?? 1, pageSize);
-
-            return View(paginatedClients);
+            return RedirectToAction(nameof(Index), new { pageNumber });
         }
 
-        // GET: PlanningOfficer/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .Include(c => c.RetainershipBIR)
-                .Include(c => c.RetainershipSPP)
-                .Include(c => c.OneTimeTransaction)
-                .Include(c => c.ExternalAudit)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            // Get requirements for this client
-            ViewBag.Requirements = await _context.PermitRequirements
-                .Where(r => r.ClientId == id)
-                .ToListAsync();
-
-            return View(client);
-        }
+        // Details action removed - details now handled via modal in the Planning Officer views
 
         // GET: PlanningOfficer/PlanRequirements/5
         public async Task<IActionResult> PlanRequirements(int? id)
@@ -130,30 +75,22 @@ namespace TestingDemo.Controllers
                 return NotFound();
             }
 
-            var client = await _context.Clients
-                .Include(c => c.RetainershipBIR)
-                .Include(c => c.RetainershipSPP)
-                .Include(c => c.OneTimeTransaction)
-                .Include(c => c.ExternalAudit)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            var client = await _context.Clients.FindAsync(id);
             if (client == null)
             {
                 return NotFound();
             }
 
-            // Check if we need to import requirements from Finance
-            var existingRequirements = await _context.PermitRequirements
-                .Where(r => r.ClientId == id)
-                .ToListAsync();
+            // Ensure status is Planning
+            if (client.Status != "Planning")
+            {
+                client.Status = "Planning";
+                await _context.SaveChangesAsync();
+            }
 
-            // Update client status
-            client.Status = "Planning";
-            await _context.SaveChangesAsync();
-
-            // Send requirements to view
-            ViewBag.Requirements = existingRequirements;
-
-            return View(client);
+            // Redirect to PlanningClients modal flow
+            TempData["OpenClientId"] = id.ToString();
+            return RedirectToAction("Index");
         }
 
         // Simple action for direct adding (no validation)
@@ -183,7 +120,9 @@ namespace TestingDemo.Controllers
             _context.PermitRequirements.Add(requirement);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("PlanRequirements", new { id });
+            TempData["SuccessMessage"] = "Requirement added successfully!";
+            TempData["OpenClientId"] = id.ToString();
+            return RedirectToAction("Index");
         }
 
         // POST: PlanningOfficer/AddRequirement
@@ -200,28 +139,36 @@ namespace TestingDemo.Controllers
                     if (client == null)
                     {
                         ModelState.AddModelError("ClientId", "Invalid client ID");
-                        return View("PlanRequirements", client);
+                        // Fall through to error handling below so we redirect back with TempData
                     }
 
-                    requirement.CreatedDate = DateTime.Now;
-                    requirement.IsCompleted = false; // Always start as not completed
+                    if (ModelState.IsValid)
+                    {
+                        requirement.CreatedDate = DateTime.Now;
+                        requirement.IsCompleted = false; // Always start as not completed
 
-                    _context.PermitRequirements.Add(requirement);
-                    await _context.SaveChangesAsync();
-                    await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
+                        _context.PermitRequirements.Add(requirement);
+                        await _context.SaveChangesAsync();
+                        await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
-                    TempData["SuccessMessage"] = "Requirement added successfully!";
-                    return RedirectToAction("PlanRequirements", new { id = requirement.ClientId });
+                        TempData["SuccessMessage"] = "Requirement added successfully!";
+                        TempData["OpenClientId"] = requirement.ClientId.ToString();
+                        var returnUrl = Request?.Form["returnUrl"].ToString();
+                        if (!string.IsNullOrWhiteSpace(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        return RedirectToAction("Index");
+                    }
                 }
                 else
                 {
                     // Log validation errors for debugging
-                    foreach (var modelState in ModelState.Values)
+                    foreach (var kvp in ModelState)
                     {
-                        foreach (var error in modelState.Errors)
+                        foreach (var error in kvp.Value.Errors)
                         {
-                            // You could log these errors
-                            System.Diagnostics.Debug.WriteLine($"Error: {error.ErrorMessage}");
+                            System.Diagnostics.Debug.WriteLine($"ModelState Error on {kvp.Key}: {error.ErrorMessage}");
                         }
                     }
                 }
@@ -234,25 +181,28 @@ namespace TestingDemo.Controllers
             }
 
             // If we get here, something went wrong
-            // Get client for the view
-            var clientModel = await _context.Clients.FindAsync(requirement.ClientId);
-
-            // Get existing requirements for the view
-            ViewBag.Requirements = await _context.PermitRequirements
-                .Where(r => r.ClientId == requirement.ClientId)
-                .ToListAsync();
-
-            // Store the invalid model in TempData
-            TempData["RequirementData"] = new
-            {
-                Name = requirement.RequirementName,
-                Description = requirement.Description,
-                IsRequired = requirement.IsRequired
-            };
-
+            // Store simple values in TempData (no anonymous objects)
+            TempData["RequirementName"] = requirement.RequirementName ?? string.Empty;
+            TempData["RequirementDescription"] = requirement.Description ?? string.Empty;
+            TempData["RequirementIsRequired"] = requirement.IsRequired ? "true" : "false";
             TempData["ErrorMessage"] = "Failed to add requirement. Please check your input.";
+            TempData["OpenClientId"] = requirement.ClientId.ToString();
+            // Collect validation errors for display
+            var errors = ModelState
+                .Where(kvp => kvp.Value.Errors.Any())
+                .Select(kvp => $"{kvp.Key}: {string.Join("; ", kvp.Value.Errors.Select(e => e.ErrorMessage))}")
+                .ToList();
+            if (errors.Any())
+            {
+                TempData["ValidationErrors"] = string.Join(" | ", errors);
+            }
 
-            return View("PlanRequirements", clientModel);
+            var backUrl = Request?.Form["returnUrl"].ToString();
+            if (!string.IsNullOrWhiteSpace(backUrl))
+            {
+                return Redirect(backUrl);
+            }
+            return RedirectToAction("Index");
         }
 
         // GET: PlanningOfficer/EditRequirement/5
@@ -289,7 +239,16 @@ namespace TestingDemo.Controllers
             {
                 try
                 {
-                    _context.Update(requirement);
+                    var existing = await _context.PermitRequirements.FindAsync(id);
+                    if (existing == null)
+                    {
+                        return NotFound();
+                    }
+                    existing.RequirementName = requirement.RequirementName;
+                    existing.Description = requirement.Description;
+                    existing.IsRequired = requirement.IsRequired;
+                    existing.IsCompleted = requirement.IsCompleted;
+
                     await _context.SaveChangesAsync();
                     await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "PlanningOfficer data changed");
 
@@ -306,7 +265,8 @@ namespace TestingDemo.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("PlanRequirements", new { id = requirement.ClientId });
+                TempData["OpenClientId"] = requirement.ClientId.ToString();
+                return RedirectToAction("Index");
             }
 
             // Get client information
@@ -422,8 +382,12 @@ namespace TestingDemo.Controllers
             int pageSize = 10;
             var clientsQuery = _context.Clients
                 .Where(c => c.Status == "Planning")
-                .AsNoTracking()
-                .OrderBy(c => c.CreatedDate);
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .OrderBy(c => c.CreatedDate)
+                .AsNoTracking();
             var paginatedClients = await PaginatedList<ClientModel>.CreateAsync(clientsQuery, pageNumber ?? 1, pageSize);
             var clientIds = paginatedClients.Select(c => c.Id).ToList();
             var requirements = await _context.PermitRequirements
@@ -433,6 +397,19 @@ namespace TestingDemo.Controllers
                 .GroupBy(r => r.ClientId)
                 .ToDictionary(g => g.Key, g => g.ToList());
             return Json(new { Clients = paginatedClients, RequirementsByClient = requirementsByClient });
+        }
+
+        // GET: PlanningOfficer/Requirements/{id}
+        [HttpGet]
+        public async Task<IActionResult> Requirements(int id)
+        {
+            var requirements = await _context.PermitRequirements
+                .Where(r => r.ClientId == id)
+                .OrderBy(r => r.Id)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return PartialView("_RequirementsList", requirements);
         }
 
         private bool RequirementExists(int id)

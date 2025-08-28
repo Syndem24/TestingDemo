@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace TestingDemo.Models
 {
@@ -26,7 +27,8 @@ namespace TestingDemo.Models
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-        // Navigation property
-        public ClientModel Client { get; set; }
+        // Navigation property (not required for form posts)
+        [ValidateNever]
+        public ClientModel? Client { get; set; }
     }
 }
