@@ -2,18 +2,17 @@
 @using TestingDemo.Models
 
 @{
-    ViewData["Title"] = "Finance Dashboard";
+    ViewData["Title"] = "Planning Officer Dashboard";
 }
 
-<div class="container-fluid">
+@* ...existing code... *@
+
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-0"><i class="bi bi-cash-coin"></i> @ViewData["Title"]</h2>
-            <p class="text-muted">Manage clients, financial details, and submissions.</p>
+            <h2 class="mb-0"><i class="bi bi-clipboard-check"></i> @ViewData["Title"]</h2>
+            <p class="text-muted">Manage clients, planning details, and permit requirements.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Client
-        </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -24,8 +23,8 @@
         </div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-light py-2">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-list-ul"></i> Client List</h5>
                 <form asp-action="Index" method="get" class="d-flex align-items-center">
@@ -40,8 +39,8 @@
             @if (Model.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="table-light">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-light sticky-top">
                             <tr>
                                 <th>
                                     <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Client Name</a>
@@ -63,62 +62,25 @@
                                         <div class="fw-medium">@item.ClientName</div>
                                         <div class="text-muted small">@item.Email</div>
                                     </td>
-                                    <td>@item.ContactPersonNumber</td>
-                                    <td>@item.TypeOfProject</td>
-                                    <td>
+                                    <td class="align-middle">@item.ContactPersonNumber</td>
+                                    <td class="align-middle">@item.TypeOfProject</td>
+                                    <td class="align-middle">
                                         <span class="badge @(item.Status == "Finance" ? "bg-primary" : "bg-secondary")">@item.Status</span>
                                         @if (!string.IsNullOrEmpty(item.PlanningReturnNote))
                                         {
                                             <i class="bi bi-info-circle-fill text-warning" data-bs-toggle="tooltip" title="Returned from Planning: @item.PlanningReturnNote"></i>
                                         }
                                     </td>
-                                    <td>@item.CreatedDate.ToString("MMM dd, yyyy")</td>
-                                    <td class="text-center">
+                                    <td class="align-middle">@item.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="text-center align-middle">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" data-bs-toggle="tooltip" title="View Details"><i class="bi bi-eye"></i></a>
+                                            <button type="button" class="btn btn-outline-info" title="View Details"
+                                                    data-bs-toggle="modal" data-bs-target="#clientModal-@item.Id">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
                                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit Client"><i class="bi bi-pencil"></i></a>
                                             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id" title="Delete Client"><i class="bi bi-trash"></i></button>
                                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sendToPlanningModal-@item.Id" title="Send to Planning Officer"><i class="bi bi-send"></i></button>
-                                        </div>
-
-                                        <!-- Modals -->
-                                        <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1">
-                                             <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Confirm Deletion</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Are you sure you want to delete <strong>@item.ClientName</strong>? This action cannot be undone.
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post">
-                                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal fade" id="sendToPlanningModal-@item.Id" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Confirm Submission</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Are you sure you want to send <strong>@item.ClientName</strong> to the Planning Officer?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                        <form asp-action="SendToPlanningOfficer" asp-route-id="@item.Id" method="post">
-                                                            <button type="submit" class="btn btn-success">Send to Planning</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -167,7 +129,32 @@
 @section Scripts {
     <script>
         $(function () {
+            // Initialize tooltips only on elements that don't have modal triggers
             $('[data-bs-toggle="tooltip"]').tooltip();
+            
+            // Ensure modals are properly initialized
+            $('[data-bs-toggle="modal"]').on('click', function() {
+                const target = $(this).data('bs-target');
+                if (target) {
+                    const modal = new bootstrap.Modal(document.querySelector(target));
+                    modal.show();
+                }
+            });
+            
+            // Debug: Log modal triggers
+            console.log('Modal triggers found:', $('[data-bs-toggle="modal"]').length);
         });
+
+        // Re-open the client's modal after redirect if flagged by server
+        (function() {
+            var openId = '@(TempData["OpenClientId"] ?? "")';
+            if (openId) {
+                var modalEl = document.getElementById('clientModal-' + openId);
+                if (modalEl) {
+                    var m = new bootstrap.Modal(modalEl);
+                    m.show();
+                }
+            }
+        })();
     </script>
 }

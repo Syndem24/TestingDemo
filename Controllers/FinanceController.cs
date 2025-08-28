@@ -34,8 +34,20 @@ namespace TestingDemo.Controllers
 
             int pageSize = 5;
 
-            var pendingQuery = _context.Clients.Where(c => c.Status == "Pending" || c.Status == "Finance").AsNoTracking();
-            var clearanceQuery = _context.Clients.Where(c => c.Status == "Clearance").AsNoTracking();
+            var pendingQuery = _context.Clients
+                .Where(c => c.Status == "Pending" || c.Status == "Finance")
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .AsNoTracking();
+            var clearanceQuery = _context.Clients
+                .Where(c => c.Status == "Clearance")
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .AsNoTracking();
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -72,28 +84,7 @@ namespace TestingDemo.Controllers
             return View(viewModel);
         }
 
-        // GET: Finance/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .Include(c => c.RetainershipBIR)
-                .Include(c => c.RetainershipSPP)
-                .Include(c => c.OneTimeTransaction)
-                .Include(c => c.ExternalAudit)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return View(client);
-        }
+        // Details view removed - details now handled via modal in the Finance table
 
         // GET: Finance/Create
         public IActionResult Create()
@@ -443,12 +434,25 @@ namespace TestingDemo.Controllers
             return RedirectToAction("Index");
         }
 
+        // GET: Finance/GetLatestData
         [HttpGet]
         public async Task<IActionResult> GetLatestData(string sortOrder, string searchString, int? pendingPageNumber, int? clearancePageNumber)
         {
             int pageSize = 5;
-            var pendingQuery = _context.Clients.Where(c => c.Status == "Pending" || c.Status == "Finance").AsNoTracking();
-            var clearanceQuery = _context.Clients.Where(c => c.Status == "Clearance").AsNoTracking();
+            var pendingQuery = _context.Clients
+                .Where(c => c.Status == "Pending" || c.Status == "Finance")
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .AsNoTracking();
+            var clearanceQuery = _context.Clients
+                .Where(c => c.Status == "Clearance")
+                .Include(c => c.RetainershipBIR)
+                .Include(c => c.RetainershipSPP)
+                .Include(c => c.OneTimeTransaction)
+                .Include(c => c.ExternalAudit)
+                .AsNoTracking();
             if (!string.IsNullOrEmpty(searchString))
             {
                 pendingQuery = pendingQuery.Where(s => s.ClientName.Contains(searchString) || s.TypeOfProject.Contains(searchString));

@@ -30,8 +30,10 @@
                     </td>
                     <td class="text-center align-middle">
                         <div class="btn-group btn-group-sm d-flex flex-wrap flex-md-nowrap gap-1 gap-md-0 w-100">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary flex-fill"
-                                title="View"><i class="bi bi-eye"></i></a>
+                            <button type="button" class="btn btn-outline-secondary flex-fill" title="View"
+                                data-bs-toggle="modal" data-bs-target="#clientModal-@item.Id">
+                                <i class="bi bi-eye"></i>
+                            </button>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary flex-fill"
                                 title="Edit"><i class="bi bi-pencil"></i></a>
                             @if (item.Status == "Pending" || item.Status == "Finance")
@@ -59,6 +61,116 @@
                         </div>
                     </td>
                 </tr>
+
+                <!-- Client Details Modal -->
+                <div class="modal fade" id="clientModal-@item.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                @{
+                                    var typeBadgeClass = item.TypeOfProject switch
+                                    {
+                                        "Retainership - BIR" => "bg-danger",
+                                        "Retainership - SPP" => "bg-info text-dark",
+                                        "One Time Transaction" => "bg-secondary",
+                                        "External Audit" => "bg-dark",
+                                        _ => "bg-light text-dark"
+                                    };
+                                }
+                                <h5 class="modal-title d-flex flex-wrap align-items-center gap-2">
+                                    <i class="bi bi-person-vcard"></i>
+                                    <span>@item.ClientName</span>
+                                    <span class="badge rounded-pill @typeBadgeClass">@item.TypeOfProject</span>
+                                    <span class="badge @(item.Status == "Clearance" ? "bg-warning text-dark" : (item.Status == "Finance" ? "bg-primary" : "bg-secondary"))">@item.Status</span>
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-12 col-md-6"><small class="text-muted d-block">Tracking #</small><span class="text-monospace">@item.TrackingNumber</span></div>
+                                    <div class="col-12 col-md-6"><small class="text-muted d-block">Submitted</small>@item.CreatedDate.ToString("yyyy-MM-dd")</div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-12 col-md-6"><small class="text-muted d-block">Project Type</small>@item.TypeOfProject</div>
+                                    <div class="col-12 col-md-6"><small class="text-muted d-block">Contact</small>@item.ContactPersonNumber</div>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.PlanningReturnNote))
+                                {
+                                    <div class="alert alert-warning py-2"><i class="bi bi-info-circle"></i> <strong>Return Note:</strong> @item.PlanningReturnNote</div>
+                                }
+
+                                <hr class="my-3" />
+                                <h6 class="fw-bold mb-2"><i class="bi bi-card-list"></i> Project Details</h6>
+                                <div style="max-height: 360px; overflow: auto;">
+                                    @if (item.TypeOfProject == "Retainership - BIR" && item.RetainershipBIR != null)
+                                    {
+                                        <div class="list-group list-group-flush small">
+                                            <div class="list-group-item"><span class="text-muted">Type Of Registrant:</span> @item.RetainershipBIR.TypeOfRegistrant</div>
+                                            <div class="list-group-item"><span class="text-muted">OCN Notes:</span> @item.RetainershipBIR.OCNNotes</div>
+                                            <div class="list-group-item"><span class="text-muted">Date OCN Generated:</span> @item.RetainershipBIR.DateOCNGenerated?.ToString("yyyy-MM-dd")</div>
+                                            <div class="list-group-item"><span class="text-muted">Date BIR Registration:</span> @item.RetainershipBIR.DateBIRRegistration?.ToString("yyyy-MM-dd")</div>
+                                            <div class="list-group-item"><span class="text-muted">BIR RDO No.:</span> @item.RetainershipBIR.BIRRdoNo</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherBirRdoNo)) { <div class="list-group-item"><span class="text-muted">Other BIR RDO No.:</span> @item.RetainershipBIR.OtherBirRdoNo</div> }
+                                            <div class="list-group-item"><span class="text-muted">Tax Filing Status:</span> @item.RetainershipBIR.TaxFilingStatus</div>
+                                            <div class="list-group-item"><span class="text-muted">Need Catch-Up Accounting:</span> @item.RetainershipBIR.NeedCatchUpAccounting</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.CatchUpReasons)) { <div class="list-group-item"><span class="text-muted">Catch-Up Reasons:</span> @item.RetainershipBIR.CatchUpReasons</div> }
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherCatchUpReason)) { <div class="list-group-item"><span class="text-muted">Other Catch-Up Reason:</span> @item.RetainershipBIR.OtherCatchUpReason</div> }
+                                            <div class="list-group-item"><span class="text-muted">Catch-Up Start Date:</span> @item.RetainershipBIR.CatchUpStartDate?.ToString("yyyy-MM-dd")</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.BIRComplianceActivities)) { <div class="list-group-item"><span class="text-muted">BIR Compliance Activities:</span> @item.RetainershipBIR.BIRComplianceActivities</div> }
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherBIRCompliance)) { <div class="list-group-item"><span class="text-muted">Other BIR Compliance:</span> @item.RetainershipBIR.OtherBIRCompliance</div> }
+                                            <div class="list-group-item"><span class="text-muted">Retainership Start Date:</span> @item.RetainershipBIR.BIRRetainershipStartDate?.ToString("yyyy-MM-dd")</div>
+                                        </div>
+                                    }
+                                    else if (item.TypeOfProject == "Retainership - SPP" && item.RetainershipSPP != null)
+                                    {
+                                        <div class="list-group list-group-flush small">
+                                            <div class="list-group-item"><span class="text-muted">SSS Reg No.:</span> @item.RetainershipSPP.SSSCompanyRegNo</div>
+                                            <div class="list-group-item"><span class="text-muted">SSS Reg Date:</span> @item.RetainershipSPP.SSSRegistrationDate?.ToString("yyyy-MM-dd")</div>
+                                            <div class="list-group-item"><span class="text-muted">PHIC Reg No.:</span> @item.RetainershipSPP.PHICCompanyRegNo</div>
+                                            <div class="list-group-item"><span class="text-muted">PHIC Reg Date:</span> @item.RetainershipSPP.PHICRegistrationDate?.ToString("yyyy-MM-dd")</div>
+                                            <div class="list-group-item"><span class="text-muted">HDMF Reg No.:</span> @item.RetainershipSPP.HDMFCompanyRegNo</div>
+                                            <div class="list-group-item"><span class="text-muted">HDMF Reg Date:</span> @item.RetainershipSPP.HDMFRegistrationDate?.ToString("yyyy-MM-dd")</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipSPP.SPPComplianceActivities)) { <div class="list-group-item"><span class="text-muted">SPP Compliance Activities:</span> @item.RetainershipSPP.SPPComplianceActivities</div> }
+                                            @if (!string.IsNullOrWhiteSpace(item.RetainershipSPP.OtherSPPCompliance)) { <div class="list-group-item"><span class="text-muted">Other SPP Compliance:</span> @item.RetainershipSPP.OtherSPPCompliance</div> }
+                                            <div class="list-group-item"><span class="text-muted">Retainership Start Date:</span> @item.RetainershipSPP.SPPRetainershipStartDate?.ToString("yyyy-MM-dd")</div>
+                                        </div>
+                                    }
+                                    else if (item.TypeOfProject == "One Time Transaction" && item.OneTimeTransaction != null)
+                                    {
+                                        <div class="list-group list-group-flush small">
+                                            <div class="list-group-item"><span class="text-muted">Registrant Type:</span> @item.OneTimeTransaction.TypeOfRegistrant</div>
+                                            <div class="list-group-item"><span class="text-muted">Area of Services:</span> @item.OneTimeTransaction.AreaOfServices</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.OneTimeTransaction.OtherAreaOfServices)) { <div class="list-group-item"><span class="text-muted">Other Area:</span> @item.OneTimeTransaction.OtherAreaOfServices</div> }
+                                        </div>
+                                    }
+                                    else if (item.TypeOfProject == "External Audit" && item.ExternalAudit != null)
+                                    {
+                                        <div class="list-group list-group-flush small">
+                                            <div class="list-group-item"><span class="text-muted">Audit Status:</span> @item.ExternalAudit.ExternalAuditStatus</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.ExternalAudit.ExternalAuditPurposes)) { <div class="list-group-item"><span class="text-muted">Purposes:</span> @item.ExternalAudit.ExternalAuditPurposes</div> }
+                                            @if (!string.IsNullOrWhiteSpace(item.ExternalAudit.ExternalAuditOtherPurpose)) { <div class="list-group-item"><span class="text-muted">Other Purpose:</span> @item.ExternalAudit.ExternalAuditOtherPurpose</div> }
+                                            <div class="list-group-item"><span class="text-muted">Report Date:</span> @item.ExternalAudit.ExternalAuditReportDate?.ToString("yyyy-MM-dd")</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex flex-wrap gap-2">
+                                @if (item.Status == "Pending" || item.Status == "Finance")
+                                {
+                                    <!-- Done => Send to Planning -->
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal"
+                                            data-bs-target="#sendToPlanningModal" data-client-id="@item.Id" data-client-name="@item.ClientName">
+                                        <i class="bi bi-check2-circle"></i> Done
+                                    </button>
+                                }
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </tbody>
     </table>
