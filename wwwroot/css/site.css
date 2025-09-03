@@ -53,22 +53,31 @@ body {
 .dashboard-liaison {
   grid-area: liaison;
   min-height: 500px;
+  overflow-y: auto;
 }
 
 .dashboard-finance {
   grid-area: finance;
+  overflow-y: auto;
+  max-height: 240px;
 }
 
 .dashboard-received {
-  grid-area: received;
+    grid-area: received;
+    overflow-y: auto;
+    max-height: 240px;
 }
 
 .dashboard-planning {
-  grid-area: planning;
+    grid-area: planning;
+    overflow-y: auto;
+    max-height: 240px;
 }
 
 .dashboard-documentation {
-  grid-area: documentation;
+    grid-area: documentation;
+    overflow-y: auto;
+    max-height: 240px;
 }
 
 /* Hover effect */
