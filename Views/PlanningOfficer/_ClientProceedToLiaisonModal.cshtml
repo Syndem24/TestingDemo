@@ -1,0 +1,109 @@
+@model TestingDemo.Models.ClientModel
+@using TestingDemo.Models
+
+@{
+    var requirementsByClient = ViewBag.Requirements as IDictionary<int, List<PermitRequirementModel>> ?? new Dictionary<int, List<PermitRequirementModel>>();
+    var hasRequirements = requirementsByClient.ContainsKey(Model.Id);
+    var allRequirementsCompleted = false;
+    var totalRequirements = 0;
+    var completedRequirements = 0;
+
+    if (hasRequirements)
+    {
+        var reqList = requirementsByClient[Model.Id];
+        if (reqList != null && reqList.Any())
+        {
+            totalRequirements = reqList.Count;
+            completedRequirements = reqList.Count(r => r.IsCompleted);
+            allRequirementsCompleted = totalRequirements > 0 && totalRequirements == completedRequirements;
+        }
+        else
+        {
+            allRequirementsCompleted = true;
+        }
+    }
+    else
+    {
+        allRequirementsCompleted = true;
+    }
+}
+
+<div class="modal fade" id="proceedToLiaisonModal-@Model.Id" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white border-0 py-3">
+                <h5 class="modal-title fw-bold mb-0">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Confirm Action
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                @if (allRequirementsCompleted)
+                {
+                    <div class="text-center mb-4">
+                        <div class="bg-success bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h6 class="text-success fw-bold mb-2">All Requirements Completed!</h6>
+                        <p class="text-muted mb-0">Ready to proceed to the next phase</p>
+                    </div>
+                    
+                    <div class="alert alert-success border-0 rounded-3 bg-success bg-opacity-10" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2 fs-5"></i>
+                            <span class="fw-medium">Perfect! All requirements have been completed for this client.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light rounded-3 p-3 border-start border-4 border-success">
+                        <p class="mb-2 fw-medium">Are you sure you want to send <strong class="text-success">@Model.ClientName</strong> to Customer Care for inspection?</p>
+                        <p class="text-muted small mb-0">This action will complete the planning phase and move the client to the next stage.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center mb-4">
+                        <div class="bg-warning bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h6 class="text-warning fw-bold mb-2">Incomplete Requirements!</h6>
+                        <p class="text-muted mb-0">Some requirements still need attention</p>
+                    </div>
+                    
+                    <div class="alert alert-warning border-0 rounded-3 bg-warning bg-opacity-10" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-5"></i>
+                            <span class="fw-bold text-warning">Warning: Incomplete Requirements</span>
+                        </div>
+                        <p class="mb-2">
+                            <strong>@Model.ClientName</strong> has <strong class="text-warning">@(totalRequirements - completedRequirements)</strong> pending requirement(s) out of @totalRequirements.
+                        </p>
+                        <hr class="my-3 opacity-25">
+                        <p class="mb-0 fw-medium">Are you sure you want to proceed? The client will be sent to Liaison/Customer Care with incomplete requirements.</p>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer border-0 py-3">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <form asp-action="ProceedToLiaison" asp-route-id="@Model.Id" method="post" style="display:inline;">
+                    @if (allRequirementsCompleted)
+                    {
+                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2 shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i>Proceed to Liaison
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 shadow-sm">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Proceed Anyway
+                        </button>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+

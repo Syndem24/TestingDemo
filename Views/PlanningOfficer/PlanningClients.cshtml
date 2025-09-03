@@ -8,68 +8,84 @@
     var requirementsByClient = ViewBag.Requirements as IDictionary<int, List<PermitRequirementModel>> ?? new Dictionary<int, List<PermitRequirementModel>>();
 }
 
-<div class="container-fluid">
+<div class="container-fluid px-4 py-3">
     <div class="row">
-        <div class="col-md-3 col-lg-2">
-            @await Html.PartialAsync("_PlanningOfficerNav")
-        </div>
-        <div class="col-md-9 col-lg-10">
-            <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4><i class="bi bi-clipboard-check"></i> Planning Officer Dashboard</h4>
-                        <p class="text-muted">Manage permit requirements for clients</p>
+        <div class="col-12">
+            <!-- Modern Header Section -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-clipboard-check text-white fs-3"></i>
                     </div>
                     <div>
-                        <a asp-action="PlanningClients" class="btn btn-outline-info">
-                            <i class="bi bi-list-task"></i> View Planning Clients
-                        </a>
+                        <h2 class="fw-bold text-dark mb-1">Planning Officer Dashboard</h2>
+                        <p class="text-muted mb-0 fs-6">Manage permit requirements for clients efficiently</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="bg-light rounded-pill px-3 py-2">
+                        <span class="text-muted small">Total Clients</span>
+                        <div class="fw-bold text-primary fs-5">@Model.Count()</div>
                     </div>
                 </div>
             </div>
 
+            <!-- Modern Alert Messages -->
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill text-success me-2 fs-5"></i>
+                        <span class="fw-medium">@TempData["SuccessMessage"]</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill"></i> @TempData["ErrorMessage"]
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2 fs-5"></i>
+                        <span class="fw-medium">@TempData["ErrorMessage"]</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
             @if (TempData["ValidationErrors"] != null)
             {
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="bi bi-bug-fill"></i> @TempData["ValidationErrors"]
+                <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-bug-fill text-warning me-2 fs-5"></i>
+                        <span class="fw-medium">@TempData["ValidationErrors"]</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-light py-3">
+            <!-- Modern Card Design -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> @ViewData["ListTitle"]</h5>
-                        <span class="badge bg-primary rounded-pill fs-6">@Model.Count()</span>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-list-ul text-primary me-2 fs-4"></i>
+                            <h5 class="mb-0 fw-bold text-dark">@ViewData["ListTitle"]</h5>
+                        </div>
+                        <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">@Model.Count() Clients</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     @if (Model.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover table-striped mb-0 align-middle">
-                                <thead class="table-dark">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4">Client Information</th>
-                                        <th>Permit Type</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
-                                        <th>Requirements</th>
-                                        <th class="text-center" style="width:160px">Actions</th>
+                                        <th class="border-0 ps-4 py-3 fw-semibold text-muted small text-uppercase">Client Information</th>
+                                        <th class="border-0 py-3 fw-semibold text-muted small text-uppercase">Permit Type</th>
+                                        <th class="border-0 py-3 fw-semibold text-muted small text-uppercase">Status</th>
+                                        <th class="border-0 py-3 fw-semibold text-muted small text-uppercase">Priority</th>
+                                        <th class="border-0 py-3 fw-semibold text-muted small text-uppercase">Requirements</th>
+                                        <th class="border-0 text-center py-3 fw-semibold text-muted small text-uppercase" style="width:180px">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -99,26 +115,26 @@
                                             allRequirementsCompleted = true;
                                         }
 
-                                        <tr class="@(item.UrgencyLevel == "Urgent" ? "table-danger" : item.UrgencyLevel == "Slightly Urgent" ? "table-warning" : "")">
-                                            <td class="ps-4">
+                                        <tr class="border-bottom @(item.UrgencyLevel == "Urgent" ? "border-danger border-opacity-25" : item.UrgencyLevel == "Slightly Urgent" ? "border-warning border-opacity-25" : "")">
+                                            <td class="ps-4 py-3">
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3">
-                                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                            <i class="bi bi-person-fill text-white"></i>
+                                                        <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                                            <i class="bi bi-person-fill text-white fs-5"></i>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div class="fw-bold text-dark">@item.ClientName</div>
-                                                        <div class="text-muted small">
-                                                            <i class="bi bi-telephone me-1"></i>@item.ContactPersonNumber
+                                                        <div class="fw-bold text-dark mb-1">@item.ClientName</div>
+                                                        <div class="text-muted small d-flex align-items-center mb-1">
+                                                            <i class="bi bi-telephone me-2"></i>@item.ContactPersonNumber
                                                         </div>
-                                                        <div class="text-muted small">
-                                                            <i class="bi bi-calendar3 me-1"></i>@item.CreatedDate.ToString("MMM dd, yyyy")
+                                                        <div class="text-muted small d-flex align-items-center">
+                                                            <i class="bi bi-calendar3 me-2"></i>@item.CreatedDate.ToString("MMM dd, yyyy")
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="py-3">
                                                 @{
                                                     var typeBadgeClass = item.TypeOfProject switch
                                                     {
@@ -129,512 +145,90 @@
                                                         _ => "bg-secondary"
                                                     };
                                                 }
-                                                <span class="badge @typeBadgeClass">@item.TypeOfProject</span>
+                                                <span class="badge @typeBadgeClass rounded-pill px-3 py-2 fw-medium">@item.TypeOfProject</span>
                                             </td>
-                                            <td>
-                                                <span class="badge bg-info fs-6">@item.Status</span>
+                                            <td class="py-3">
+                                                <span class="badge bg-info rounded-pill px-3 py-2 fw-medium">@item.Status</span>
                                             </td>
-                                            <td>
+                                            <td class="py-3">
                                                 @if (item.UrgencyLevel == "Urgent")
                                                 {
-                                                    <span class="badge bg-danger fs-6">
+                                                    <span class="badge bg-danger rounded-pill px-3 py-2 fw-medium">
                                                         <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgent
                                                     </span>
                                                 }
                                                 else if (item.UrgencyLevel == "Slightly Urgent")
                                                 {
-                                                    <span class="badge bg-warning text-dark fs-6">
+                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium">
                                                         <i class="bi bi-exclamation-circle me-1"></i>Slightly Urgent
                                                     </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-success fs-6">
+                                                    <span class="badge bg-success rounded-pill px-3 py-2 fw-medium">
                                                         <i class="bi bi-check-circle me-1"></i>Normal
                                                     </span>
                                                 }
                                             </td>
-                                            <td>
+                                            <td class="py-3">
                                                 @if (totalRequirements > 0)
                                                 {
                                                     <div class="d-flex align-items-center">
-                                                        <div class="progress me-2" style="width: 60px; height: 8px;">
+                                                        <div class="progress me-3" style="width: 80px; height: 8px; border-radius: 10px;">
                                                             <div class="progress-bar @(allRequirementsCompleted ? "bg-success" : "bg-warning")" 
                                                                  style="width: @((double)completedRequirements / totalRequirements * 100)%"></div>
                                                         </div>
-                                                        <small class="text-muted">
+                                                        <div class="text-muted small fw-medium">
                                                             @completedRequirements/@totalRequirements
-                                                        </small>
+                                                        </div>
                                                         @if (allRequirementsCompleted)
                                                         {
-                                                            <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                                                            <i class="bi bi-check-circle-fill text-success ms-2 fs-6"></i>
                                                         }
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-light text-dark">
+                                                    <span class="badge bg-light text-dark rounded-pill px-3 py-2">
                                                         <i class="bi bi-plus-circle me-1"></i>No Requirements
                                                     </span>
                                                 }
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center py-3">
                                                 @if (item.Status == "Planning")
                                                 {
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <button type="button" class="btn btn-outline-info" title="View complete client information"
+                                                        <button type="button" class="btn btn-outline-info border-0 shadow-sm" title="View complete client information"
                                                                 data-bs-toggle="modal" data-bs-target="#clientModal-@item.Id">
-                                                            <i class="bi bi-eye"></i>
+                                                            <i class="bi bi-eye fs-6"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-warning" 
+                                                        <button type="button" class="btn btn-outline-warning border-0 shadow-sm" 
                                                                 data-bs-toggle="modal" data-bs-target="#backToFinanceModal-@item.Id" 
                                                                 title="Return to Finance">
-                                                            <i class="bi bi-arrow-left-circle"></i>
+                                                            <i class="bi bi-arrow-left-circle fs-6"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-success" 
+                                                        <button type="button" class="btn btn-outline-success border-0 shadow-sm" 
                                                                 data-bs-toggle="modal" data-bs-target="#proceedToLiaisonModal-@item.Id" 
                                                                 title="Send to Liaison">
-                                                            <i class="bi bi-check-lg"></i>
+                                                            <i class="bi bi-check-lg fs-6"></i>
                                                         </button>
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <button type="button" class="btn btn-outline-info btn-sm" title="View client details"
+                                                    <button type="button" class="btn btn-outline-info btn-sm border-0 shadow-sm" title="View client details"
                                                         data-bs-toggle="modal" data-bs-target="#clientModal-@item.Id">
-                                                        <i class="bi bi-eye"></i>
+                                                        <i class="bi bi-eye fs-6"></i>
                                                     </button>
                                                 }
                                             </td>
                                         </tr>
 
-                                        <!-- Proceed to Liaison Modal -->
-                                        <div class="modal fade" id="proceedToLiaisonModal-@item.Id" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">
-                                                            <i class="bi bi-arrow-right-circle text-success me-2"></i>Confirm Action
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        @if (allRequirementsCompleted)
-                                                        {
-                                                            <div class="alert alert-success" role="alert">
-                                                                <i class="bi bi-check-circle-fill me-2"></i>
-                                                                <strong>All requirements completed!</strong>
-                                                            </div>
-                                                            <p>Are you sure you want to send <strong>@item.ClientName</strong> to Customer Care for inspection?</p>
-                                                            <p class="text-muted small">This action will complete the planning phase and move the client to the next stage.</p>
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="alert alert-warning" role="alert">
-                                                                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Incomplete Requirements!</h4>
-                                                                <p>
-                                                                    <strong>@item.ClientName</strong> has <strong>@(totalRequirements - completedRequirements)</strong> pending requirement(s) out of @totalRequirements.
-                                                                </p>
-                                                                <hr>
-                                                                <p class="mb-0">Are you sure you want to proceed? The client will be sent to Liaison/Customer Care with incomplete requirements.</p>
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                            <i class="bi bi-x-circle me-1"></i>Cancel
-                                                        </button>
-                                                        <form asp-action="ProceedToLiaison" asp-route-id="@item.Id" method="post" style="display:inline;">
-                                                            @if (allRequirementsCompleted)
-                                                            {
-                                                                <button type="submit" class="btn btn-success">
-                                                                    <i class="bi bi-check-lg me-1"></i>Proceed to Liaison
-                                                                </button>
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="submit" class="btn btn-warning">
-                                                                    <i class="bi bi-exclamation-triangle me-1"></i>Proceed Anyway
-                                                                </button>
-                                                            }
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @await Html.PartialAsync("_ClientProceedToLiaisonModal", item)
 
-                                        <!-- Back to Finance Modal -->
-                                        <div class="modal fade" id="backToFinanceModal-@item.Id" tabindex="-1" aria-labelledby="backToFinanceModalLabel-@item.Id" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <form asp-action="BackToFinance" asp-route-id="@item.Id" method="post">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="backToFinanceModalLabel-@item.Id">
-                                                                <i class="bi bi-arrow-left-circle text-warning me-2"></i>Return Client to Finance
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="mb-3">
-                                                                <label for="note-@item.Id" class="form-label">
-                                                                    <i class="bi bi-chat-left-text me-1"></i>Reason for Return <span class="text-danger">*</span>
-                                                                </label>
-                                                                <textarea class="form-control" id="note-@item.Id" name="note" rows="4" 
-                                                                          placeholder="Please provide a detailed reason for returning this client to Finance..." required></textarea>
-                                                                <div class="form-text">This note will help Finance understand what needs to be corrected.</div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                                <i class="bi bi-x-circle me-1"></i>Cancel
-                                                            </button>
-                                                            <button type="submit" class="btn btn-warning">
-                                                                <i class="bi bi-arrow-left-circle me-1"></i>Return to Finance
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @await Html.PartialAsync("_ClientBackToFinanceModal", item)
 
-                                        <!-- Client Details Modal -->
-                                        <div class="modal fade" id="clientModal-@item.Id" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-                                                <div class="modal-content">
-                                                    <div class="modal-header bg-light">
-                                                        @{
-                                                            var projectBadgeClass = item.TypeOfProject switch
-                                                            {
-                                                                "Retainership - BIR" => "bg-danger",
-                                                                "Retainership - SPP" => "bg-info text-dark",
-                                                                "One Time Transaction" => "bg-secondary",
-                                                                "External Audit" => "bg-dark",
-                                                                _ => "bg-light text-dark"
-                                                            };
-                                                        }
-                                                        <h5 class="modal-title d-flex flex-wrap align-items-center gap-2">
-                                                            <i class="bi bi-person-vcard"></i>
-                                                            <span>@item.ClientName</span>
-                                                            <span class="badge rounded-pill @typeBadgeClass">@item.TypeOfProject</span>
-                                                            <span class="badge @(item.Status == "Planning" ? "bg-info" : "bg-secondary")">@item.Status</span>
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <!-- Basic Client Information -->
-                                                        <div class="row g-3 mb-4">
-                                                            <div class="col-12">
-                                                                <h6 class="fw-bold mb-3 text-primary">
-                                                                    <i class="bi bi-info-circle me-2"></i>Client Information
-                                                                </h6>
-                                                            </div>
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="border rounded p-3 h-100">
-                                                                    <small class="text-muted d-block mb-1">Tracking Number</small>
-                                                                    <span class="text-monospace fw-bold fs-6">@item.TrackingNumber</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="border rounded p-3 h-100">
-                                                                    <small class="text-muted d-block mb-1">Submitted Date</small>
-                                                                    <span class="fw-bold fs-6">@item.CreatedDate.ToString("yyyy-MM-dd")</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="border rounded p-3 h-100">
-                                                                    <small class="text-muted d-block mb-1">Contact Number</small>
-                                                                    <span class="fw-bold fs-6">@item.ContactPersonNumber</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="border rounded p-3 h-100">
-                                                                    <small class="text-muted d-block mb-1">Email</small>
-                                                                    <span class="fw-bold fs-6">@item.Email</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="border rounded p-3 h-100">
-                                                                    <small class="text-muted d-block mb-1">Urgency Level</small>
-                                                                    <span class="badge @(item.UrgencyLevel == "Urgent" ? "bg-danger" : item.UrgencyLevel == "Slightly Urgent" ? "bg-warning text-dark" : "bg-success") fs-6">@item.UrgencyLevel</span>
-                                                                </div>
-                                                            </div>
-                                                            @if (!string.IsNullOrWhiteSpace(item.RegisteredCompanyAddress))
-                                                            {
-                                                                <div class="col-12">
-                                                                    <div class="border rounded p-3">
-                                                                        <small class="text-muted d-block mb-1">Company Address</small>
-                                                                        <span class="fw-bold fs-6">@item.RegisteredCompanyAddress</span>
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        </div>
-
-                                                        @if (!string.IsNullOrWhiteSpace(item.PlanningReturnNote))
-                                                        {
-                                                            <div class="alert alert-warning py-3 mb-4">
-                                                                <h6 class="alert-heading">
-                                                                    <i class="bi bi-info-circle"></i> Return Note
-                                                                </h6>
-                                                                <p class="mb-0">@item.PlanningReturnNote</p>
-                                                            </div>
-                                                        }
-
-                                                        <hr class="my-4" />
-                                                        
-                                                        <!-- Project Details Section -->
-                                                        <h6 class="fw-bold mb-3 text-primary">
-                                                            <i class="bi bi-card-list me-2"></i>Project Details
-                                                        </h6>
-                                                        <div class="border rounded p-4 mb-4" style="max-height: 400px; overflow-y: auto;">
-                                                            @if (item.TypeOfProject == "Retainership - BIR" && item.RetainershipBIR != null)
-                                                            {
-                                                                <div class="row g-3">
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Type Of Registrant</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.TypeOfRegistrant</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">OCN Notes</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.OCNNotes</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Date OCN Generated</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.DateOCNGenerated?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Date BIR Registration</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.DateBIRRegistration?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">BIR RDO No.</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.BIRRdoNo</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherBirRdoNo))
-                                                                    {
-                                                                        <div class="col-12 col-md-6">
-                                                                            <small class="text-muted">Other BIR RDO No.</small>
-                                                                            <div class="fw-bold">@item.RetainershipBIR.OtherBirRdoNo</div>
-                                                                        </div>
-                                                                    }
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Tax Filing Status</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.TaxFilingStatus</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Need Catch-Up Accounting</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.NeedCatchUpAccounting</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.CatchUpReasons))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Catch-Up Reasons</small>
-                                                                            <div class="fw-bold">@item.RetainershipBIR.CatchUpReasons</div>
-                                                                        </div>
-                                                                    }
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherCatchUpReason))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Other Catch-Up Reason</small>
-                                                                            <div class="fw-bold">@item.RetainershipBIR.OtherCatchUpReason</div>
-                                                                        </div>
-                                                                    }
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Catch-Up Start Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.CatchUpStartDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.BIRComplianceActivities))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">BIR Compliance Activities</small>
-                                                                            <div class="fw-bold">@item.RetainershipBIR.BIRComplianceActivities</div>
-                                                                        </div>
-                                                                    }
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipBIR.OtherBIRCompliance))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Other BIR Compliance</small>
-                                                                            <div class="fw-bold">@item.RetainershipBIR.OtherBIRCompliance</div>
-                                                                        </div>
-                                                                    }
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Retainership Start Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipBIR.BIRRetainershipStartDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                            else if (item.TypeOfProject == "Retainership - SPP" && item.RetainershipSPP != null)
-                                                            {
-                                                                <div class="row g-3">
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">SSS Reg No.</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.SSSCompanyRegNo</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">SSS Reg Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.SSSRegistrationDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">PHIC Reg No.</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.PHICCompanyRegNo</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">PHIC Reg Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.PHICRegistrationDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">HDMF Reg No.</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.HDMFCompanyRegNo</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">HDMF Reg Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.HDMFRegistrationDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipSPP.SPPComplianceActivities))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">SPP Compliance Activities</small>
-                                                                            <div class="fw-bold">@item.RetainershipSPP.SPPComplianceActivities</div>
-                                                                        </div>
-                                                                    }
-                                                                    @if (!string.IsNullOrWhiteSpace(item.RetainershipSPP.OtherSPPCompliance))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Other SPP Compliance</small>
-                                                                            <div class="fw-bold">@item.RetainershipSPP.OtherSPPCompliance</div>
-                                                                        </div>
-                                                                    }
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Retainership Start Date</small>
-                                                                        <div class="fw-bold">@item.RetainershipSPP.SPPRetainershipStartDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                            else if (item.TypeOfProject == "One Time Transaction" && item.OneTimeTransaction != null)
-                                                            {
-                                                                <div class="row g-3">
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Registrant Type</small>
-                                                                        <div class="fw-bold">@item.OneTimeTransaction.TypeOfRegistrant</div>
-                                                                    </div>
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Area of Services</small>
-                                                                        <div class="fw-bold">@item.OneTimeTransaction.AreaOfServices</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.OneTimeTransaction.OtherAreaOfServices))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Other Area</small>
-                                                                            <div class="fw-bold">@item.OneTimeTransaction.OtherAreaOfServices</div>
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                            else if (item.TypeOfProject == "External Audit" && item.ExternalAudit != null)
-                                                            {
-                                                                <div class="row g-3">
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Audit Status</small>
-                                                                        <div class="fw-bold">@item.ExternalAudit.ExternalAuditStatus</div>
-                                                                    </div>
-                                                                    @if (!string.IsNullOrWhiteSpace(item.ExternalAudit.ExternalAuditPurposes))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Purposes</small>
-                                                                            <div class="fw-bold">@item.ExternalAudit.ExternalAuditPurposes</div>
-                                                                        </div>
-                                                                    }
-                                                                    @if (!string.IsNullOrWhiteSpace(item.ExternalAudit.ExternalAuditOtherPurpose))
-                                                                    {
-                                                                        <div class="col-12">
-                                                                            <small class="text-muted">Other Purpose</small>
-                                                                            <div class="fw-bold">@item.ExternalAudit.ExternalAuditOtherPurpose</div>
-                                                                        </div>
-                                                                    }
-                                                                    <div class="col-12 col-md-6">
-                                                                        <small class="text-muted">Report Date</small>
-                                                                        <div class="fw-bold">@item.ExternalAudit.ExternalAuditReportDate?.ToString("yyyy-MM-dd")</div>
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        </div>
-
-                                                        <hr class="my-4" />
-                                                        
-                                                        <!-- Permit Requirements Section -->
-                                                        @{
-                                                            var reqMap = ViewBag.Requirements as System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<TestingDemo.Models.PermitRequirementModel>>;
-                                                            var reqs = (reqMap != null && reqMap.ContainsKey(item.Id)) ? reqMap[item.Id] : new System.Collections.Generic.List<TestingDemo.Models.PermitRequirementModel>();
-                                                        }
-                                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                                            <h6 class="fw-bold mb-0 text-primary">
-                                                                <i class="bi bi-list-check me-2"></i>Permit Requirements
-                                                            </h6>
-                                                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addReqModal-@item.Id">
-                                                                <i class="bi bi-plus-lg"></i> Add Requirement
-                                                            </button>
-                                                        </div>
-                                                        <div class="border rounded p-3 bg-light" id="req-list-@item.Id">
-                                                            @await Html.PartialAsync("_RequirementsList", reqs)
-                                                        </div>
-
-                                                        <!-- Add Requirement Modal -->
-                                                        <div class="modal fade" id="addReqModal-@item.Id" tabindex="-1" aria-hidden="true">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title">
-                                                                            <i class="bi bi-plus-circle me-2"></i>Add Requirement
-                                                                        </h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <form asp-action="AddRequirement" method="post">
-                                                                        @Html.AntiForgeryToken()
-                                                                        <div class="modal-body">
-                                                                            <input type="hidden" name="ClientId" value="@item.Id" />
-                                                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                                                                            <div class="mb-3">
-                                                                                <label class="form-label">
-                                                                                    <i class="bi bi-card-text me-1"></i>Requirement Name <span class="text-danger">*</span>
-                                                                                </label>
-                                                                                <textarea name="RequirementName" class="form-control" rows="3" 
-                                                                                          placeholder="Enter the requirement name..." required></textarea>
-                                                                            </div>
-                                                                            <div class="mb-3">
-                                                                                <label class="form-label">
-                                                                                    <i class="bi bi-chat-left-text me-1"></i>Description <span class="text-danger">*</span>
-                                                                                </label>
-                                                                                <textarea name="Description" class="form-control" rows="3" 
-                                                                                          placeholder="Provide detailed description..." required></textarea>
-                                                                            </div>
-                                                                            <div class="form-check mb-2">
-                                                                                <input class="form-check-input" type="checkbox" id="isRequired-@item.Id" name="IsRequired" value="true" checked>
-                                                                                <input type="hidden" name="IsRequired" value="false">
-                                                                                <label class="form-check-label" for="isRequired-@item.Id">
-                                                                                    <i class="bi bi-exclamation-circle me-1"></i>Required
-                                                                                </label>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                                                <i class="bi bi-x-circle me-1"></i>Cancel
-                                                                            </button>
-                                                                            <button type="submit" class="btn btn-primary">
-                                                                                <i class="bi bi-plus-lg me-1"></i>Add Requirement
-                                                                            </button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer bg-light">
-                                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                                            <i class="bi bi-x-circle me-1"></i>Close
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @await Html.PartialAsync("_ClientDetailsModal", item)
                                     }
                                 </tbody>
                             </table>
@@ -643,15 +237,17 @@
                     else
                     {
                         <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="bi bi-inbox display-1 text-muted"></i>
+                            <div class="mb-4">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px;">
+                                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                                </div>
                             </div>
-                            <h5 class="text-muted mb-2">No Clients Found</h5>
-                            <p class="text-muted">There are no pending clients available at the moment.</p>
+                            <h5 class="text-muted mb-2 fw-bold">No Clients Found</h5>
+                            <p class="text-muted mb-0">There are no pending clients available at the moment.</p>
                         </div>
                     }
                 </div>
-                <div class="card-footer bg-light">
+                <div class="card-footer bg-white border-0 py-3">
                     <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center mb-0">
                             @{
@@ -660,16 +256,16 @@
                                 var currentAction = ViewData["CurrentAction"] as string;
                             }
                             <li class="page-item @prevDisabled">
-                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex - 1)" class="page-link">
-                                    <i class="bi bi-chevron-left"></i> Previous
+                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex - 1)" class="page-link border-0 shadow-sm rounded me-2">
+                                    <i class="bi bi-chevron-left me-1"></i> Previous
                                 </a>
                             </li>
                             <li class="page-item active" aria-current="page">
-                                <span class="page-link fw-bold">Page @Model.PageIndex of @Model.TotalPages</span>
+                                <span class="page-link bg-primary border-0 shadow-sm rounded fw-bold">Page @Model.PageIndex of @Model.TotalPages</span>
                             </li>
                             <li class="page-item @nextDisabled">
-                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex + 1)" class="page-link">
-                                    Next <i class="bi bi-chevron-right"></i>
+                                <a asp-action="@currentAction" asp-route-pageNumber="@(Model.PageIndex + 1)" class="page-link border-0 shadow-sm rounded ms-2">
+                                    Next <i class="bi bi-chevron-right ms-1"></i>
                                 </a>
                             </li>
                         </ul>
@@ -680,10 +276,82 @@
     </div>
 </div>
 
+<!-- Edit Requirement Modals -->
+@foreach (var item in Model)
+{
+    @if (ViewBag.Requirements != null && ((IDictionary<int, List<TestingDemo.Models.PermitRequirementModel>>)ViewBag.Requirements).ContainsKey(item.Id))
+    {
+        var requirements = ((IDictionary<int, List<TestingDemo.Models.PermitRequirementModel>>)ViewBag.Requirements)[item.Id];
+        foreach (var req in requirements)
+        {
+            @await Html.PartialAsync("EditRequirement", req)
+        }
+    }
+}
+
 @section Scripts {
     <script>
         // Resolve correct base URL (supports virtual directories)
         var requirementsUrlBase = '@Url.Action("Requirements", "PlanningOfficer")/';
+        
+        // Modal Management Functions
+        function openAddRequirementModal(clientId) {
+            // Close the client details modal first
+            var clientModal = document.getElementById('clientModal-' + clientId);
+            if (clientModal) {
+                var bsClientModal = bootstrap.Modal.getInstance(clientModal);
+                if (bsClientModal) {
+                    bsClientModal.hide();
+                }
+            }
+            
+            // Wait a bit for the modal to close, then open the add requirement modal
+            setTimeout(function() {
+                var addReqModal = document.getElementById('addReqModal-' + clientId);
+                if (addReqModal) {
+                    var bsAddReqModal = new bootstrap.Modal(addReqModal);
+                    bsAddReqModal.show();
+                }
+            }, 300);
+        }
+        
+        function openEditRequirementModal(requirementId, clientId) {
+            // Close any open modals first
+            var openModals = document.querySelectorAll('.modal.show');
+            openModals.forEach(function(modal) {
+                var bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            });
+            
+            // Wait a bit for modals to close, then open the edit requirement modal
+            setTimeout(function() {
+                var editReqModal = document.getElementById('editRequirementModal-' + requirementId);
+                if (editReqModal) {
+                    var bsEditReqModal = new bootstrap.Modal(editReqModal);
+                    bsEditReqModal.show();
+                    
+                    // Store the client ID for potential refresh after edit
+                    editReqModal.setAttribute('data-client-id', clientId);
+                } else {
+                    console.error('Edit requirement modal not found for ID:', requirementId);
+                }
+            }, 300);
+        }
+        
+        // Handle modal cleanup when closed
+        function handleModalCleanup() {
+            // Remove any stuck modal backdrops
+            var stuckBackdrops = document.querySelectorAll('.modal-backdrop');
+            stuckBackdrops.forEach(function(backdrop) {
+                backdrop.remove();
+            });
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+        }
         
         $(function () {
             // Initialize tooltips
@@ -691,9 +359,18 @@
             
             // Handle modal cleanup when closed
             $('.modal').on('hidden.bs.modal', function () {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
-                $('body').css('padding-right', '');
+                handleModalCleanup();
+            });
+            
+            // Handle modal cleanup when shown
+            $('.modal').on('shown.bs.modal', function () {
+                // Ensure only one modal backdrop exists
+                var backdrops = document.querySelectorAll('.modal-backdrop');
+                if (backdrops.length > 1) {
+                    for (var i = 1; i < backdrops.length; i++) {
+                        backdrops[i].remove();
+                    }
+                }
             });
             
             // Auto-dismiss alerts after 5 seconds
@@ -782,6 +459,201 @@
         $('button[type="submit"]').each(function() {
             $(this).data('original-text', $(this).html());
         });
+
+        // Refresh requirements list after adding new requirement
+        function refreshRequirementsList(clientId) {
+            var targetElement = document.getElementById('req-list-' + clientId);
+            if (targetElement) {
+                var url = requirementsUrlBase + clientId + '?t=' + Date.now();
+                
+                fetch(url, { 
+                    cache: 'no-store',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function (response) { 
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text(); 
+                })
+                .then(function (html) {
+                    targetElement.innerHTML = html;
+                    console.debug('[Requirements] Refreshed requirements list for client:', clientId);
+                })
+                .catch(function (error) { 
+                    console.error('[Requirements] Error refreshing requirements:', error);
+                });
+            }
+        }
+        
+        // Handle Add Requirement form submission
+        function handleAddRequirementSubmit(clientId) {
+            var form = document.getElementById('addRequirementForm-' + clientId);
+            var formFields = document.getElementById('formFields-' + clientId);
+            var successMessage = document.getElementById('successMessage-' + clientId);
+            var submitBtn = document.getElementById('submitBtn-' + clientId);
+            
+            // Show loading state with shimmer effect
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Adding...';
+            submitBtn.classList.add('btn-loading');
+            
+            // Get form data
+            var formData = new FormData(form);
+            
+            // Submit form via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(function(html) {
+                // Remove loading state
+                submitBtn.classList.remove('btn-loading');
+                
+                // Animate form fields exit
+                formFields.classList.add('form-fields-exit');
+                
+                setTimeout(function() {
+                    // Hide form fields and show success message
+                    formFields.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    successMessage.classList.add('success-message-enter');
+                    
+                    // Update submit button
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Requirement Added!';
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+                    submitBtn.disabled = true;
+                    
+                    // Auto-close modal after 3 seconds
+                    setTimeout(function() {
+                        var addReqModal = document.getElementById('addReqModal-' + clientId);
+                        if (addReqModal) {
+                            var bsModal = bootstrap.Modal.getInstance(addReqModal);
+                            if (bsModal) {
+                                bsModal.hide();
+                            }
+                        }
+                        
+                        // Refresh the requirements list in the client details modal
+                        refreshRequirementsList(clientId);
+                    }, 3000);
+                }, 300);
+            })
+            .catch(function(error) {
+                console.error('Error adding requirement:', error);
+                
+                // Remove loading state
+                submitBtn.classList.remove('btn-loading');
+                
+                // Show error message
+                var errorHtml = '<div class="alert alert-danger border-0 rounded-3 bg-danger bg-opacity-10 mb-4 success-message-enter">' +
+                    '<div class="d-flex align-items-center">' +
+                    '<div class="bg-danger bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">' +
+                    '<i class="bi bi-exclamation-triangle-fill text-danger"></i>' +
+                    '</div>' +
+                    '<div>' +
+                    '<h6 class="alert-heading fw-bold mb-1 text-danger">Error Adding Requirement</h6>' +
+                    '<p class="mb-0 text-dark">There was an error adding the requirement. Please try again.</p>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+                
+                formFields.insertAdjacentHTML('beforebegin', errorHtml);
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-plus-lg me-2"></i>Add Requirement';
+            });
+        }
+        
+        // Handle Edit Requirement form submission
+        function handleEditRequirementSubmit(requirementId) {
+            var form = document.getElementById('editRequirementForm-' + requirementId);
+            var submitBtn = form.querySelector('button[type="submit"]');
+            var modal = form.closest('.modal');
+            var clientId = modal.getAttribute('data-client-id');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Saving...';
+            submitBtn.classList.add('btn-loading');
+            
+            // Get form data
+            var formData = new FormData(form);
+            
+            // Submit form via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(function(html) {
+                // Remove loading state
+                submitBtn.classList.remove('btn-loading');
+                
+                // Show success state
+                submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Saved!';
+                submitBtn.classList.remove('btn-primary');
+                submitBtn.classList.add('btn-success');
+                submitBtn.disabled = true;
+                
+                // Auto-close modal after 2 seconds
+                setTimeout(function() {
+                    var editReqModal = document.getElementById('editRequirementModal-' + requirementId);
+                    if (editReqModal) {
+                        var bsModal = bootstrap.Modal.getInstance(editReqModal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+                    
+                    // Refresh the requirements list if we have a client ID
+                    if (clientId) {
+                        refreshRequirementsList(clientId);
+                    }
+                }, 2000);
+            })
+            .catch(function(error) {
+                console.error('Error updating requirement:', error);
+                
+                // Remove loading state
+                submitBtn.classList.remove('btn-loading');
+                
+                // Show error message
+                var errorHtml = '<div class="alert alert-danger border-0 rounded-3 bg-danger bg-opacity-10 mb-4">' +
+                    '<div class="d-flex align-items-center">' +
+                    '<div class="bg-danger bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">' +
+                    '<i class="bi bi-exclamation-triangle-fill text-danger"></i>' +
+                    '</div>' +
+                    '<div>' +
+                    '<h6 class="alert-heading fw-bold mb-1 text-danger">Error Updating Requirement</h6>' +
+                    '<p class="mb-0 text-dark">There was an error updating the requirement. Please try again.</p>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+                
+                // Insert error message before the form
+                form.insertAdjacentHTML('beforebegin', errorHtml);
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Changes';
+            });
+        }
     </script>
     
     <!-- Success Toast -->

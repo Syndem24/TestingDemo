@@ -1,85 +1,73 @@
 @model TestingDemo.Models.PermitRequirementModel
 
 @{
-    ViewData["Title"] = "Edit Requirement";
     var client = ViewBag.Client as TestingDemo.Models.ClientModel;
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-3">
-            @await Html.PartialAsync("_PlanningOfficerNav")
-        </div>
-        <div class="col-md-9">
-            <div class="row mb-4">
-                <div class="col">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a asp-action="PlanRequirements"
-                                    asp-route-id="@Model.ClientId">Plan Requirements</a></li>
-                            <li class="breadcrumb-item active">Edit Requirement</li>
-                        </ol>
-                    </nav>
-                    <h2><i class="bi bi-pencil-square"></i> Edit Requirement</h2>
-                </div>
+<div class="modal fade" id="editRequirementModal-@Model.Id" tabindex="-1" aria-labelledby="editRequirementModalLabel-@Model.Id" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white border-0 py-3">
+                <h5 class="modal-title fw-bold mb-0" id="editRequirementModalLabel-@Model.Id">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Requirement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body p-4">
+                <form id="editRequirementForm-@Model.Id" asp-action="EditRequirement" method="post" onsubmit="handleEditRequirementSubmit(@Model.Id); return false;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ClientId" />
+                    <input type="hidden" asp-for="CreatedDate" />
 
-            <div class="row">
-                <div class="col-md-8 mx-auto">
-                    <div class="card shadow">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="bi bi-pencil"></i> Edit Requirement Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <form asp-action="EditRequirement" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" asp-for="Id" />
-                                <input type="hidden" asp-for="ClientId" />
-                                <input type="hidden" asp-for="CreatedDate" />
-
-                                <div class="mb-3">
-                                    <label asp-for="RequirementName" class="form-label">Requirement Name</label>
-                                    <textarea asp-for="RequirementName" class="form-control" rows="5"
-                                        required></textarea>
-                                    <span asp-validation-for="RequirementName" class="text-danger"></span>
-                                    <div class="form-text text-muted">Enter each requirement on a separate line</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Description" class="form-label">Description</label>
-                                    <textarea asp-for="Description" class="form-control" rows="3" required></textarea>
-                                    <span asp-validation-for="Description" class="text-danger"></span>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input asp-for="IsRequired" class="form-check-input" />
-                                            <label asp-for="IsRequired" class="form-check-label">Is Required</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input asp-for="IsCompleted" class="form-check-input" />
-                                            <label asp-for="IsCompleted" class="form-check-label">Is Completed</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between">
-                                    <a asp-action="PlanRequirements" asp-route-id="@Model.ClientId"
-                                        class="btn btn-secondary">
-                                        <i class="bi bi-arrow-left"></i> Back to Requirements
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save"></i> Save Changes
-                                    </button>
-                                </div>
-                            </form>
+                    <div class="mb-4">
+                        <label asp-for="RequirementName" class="form-label fw-medium">
+                            <i class="bi bi-card-text me-2 text-primary"></i>Requirement Name <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="RequirementName" class="form-control rounded-3" rows="5"
+                            placeholder="Enter the requirement name..." required></textarea>
+                        <span asp-validation-for="RequirementName" class="text-danger small"></span>
+                        <div class="form-text text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Enter each requirement on a separate line
                         </div>
                     </div>
-                </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-medium">
+                            <i class="bi bi-chat-left-text me-2 text-primary"></i>Description <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="Description" class="form-control rounded-3" rows="3" 
+                            placeholder="Provide detailed description..." required></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check p-3 bg-light rounded-3 border-start border-4 border-warning">
+                                <input asp-for="IsRequired" class="form-check-input" />
+                                <label asp-for="IsRequired" class="form-check-label fw-medium">
+                                    <i class="bi bi-exclamation-circle me-2 text-warning"></i>Is Required
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check p-3 bg-light rounded-3 border-start border-4 border-success">
+                                <input asp-for="IsCompleted" class="form-check-input" />
+                                <label asp-for="IsCompleted" class="form-check-label fw-medium">
+                                    <i class="bi bi-check-circle me-2 text-success"></i>Is Completed
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 py-3">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <button type="submit" form="editRequirementModal-@Model.Id" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+                    <i class="bi bi-save me-2"></i>Save Changes
+                </button>
             </div>
         </div>
     </div>

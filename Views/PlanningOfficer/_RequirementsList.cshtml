@@ -2,16 +2,16 @@
 
 @if (Model != null && Model.Any())
 {
-    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem;">
-        <table class="table table-sm mb-0">
-            <thead class="table-light">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
                 <tr>
-                    <th style="width: 36px;" class="text-center">#</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th class="text-center">Required</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center" style="width: 80px;">Actions</th>
+                    <th class="border-0 text-center" style="width: 40px;">#</th>
+                    <th class="border-0">Name</th>
+                    <th class="border-0">Description</th>
+                    <th class="border-0 text-center">Required</th>
+                    <th class="border-0 text-center">Status</th>
+                    <th class="border-0 text-center" style="width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -20,22 +20,47 @@
                 }
                 @foreach (var r in Model)
                 {
-                    <tr>
-                        <td class="text-center">@i</td>
-                        <td>@r.RequirementName</td>
-                        <td class="text-muted">@r.Description</td>
-                        <td class="text-center">@(r.IsRequired ? Html.Raw("<span class=\"badge bg-danger\">Required</span>") :
-                                        Html.Raw("<span class=\"badge bg-secondary\">Optional</span>"))</td>
-                <td class="text-center">@(r.IsCompleted ? Html.Raw("<span class=\"badge bg-success\">Completed</span>")
-                                            : Html.Raw("<span class=\"badge bg-warning text-dark\">Pending</span>"))</td>
-                <td class="text-center">
-                    <a class="btn btn-sm btn-outline-primary" asp-action="EditRequirement"
-                        asp-controller="PlanningOfficer" asp-route-id="@r.Id" title="Edit this requirement">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                </td>
-            </tr>
-                        i++;
+                    <tr class="border-bottom">
+                        <td class="text-center fw-bold text-muted">@i</td>
+                        <td class="fw-medium">@r.RequirementName</td>
+                        <td class="text-muted small">@r.Description</td>
+                        <td class="text-center">
+                            @if (r.IsRequired)
+                            {
+                                <span class="badge bg-danger rounded-pill px-3 py-2">
+                                    <i class="bi bi-exclamation-circle me-1"></i>Required
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                    <i class="bi bi-dash-circle me-1"></i>Optional
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (r.IsCompleted)
+                            {
+                                <span class="badge bg-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>Completed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                    <i class="bi bi-clock me-1"></i>Pending
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill border-0 shadow-sm" 
+                                    onclick="openEditRequirementModal(@r.Id, @r.ClientId)" 
+                                    title="Edit this requirement">
+                                <i class="bi bi-pencil fs-6"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    i++;
                 }
             </tbody>
         </table>
@@ -43,5 +68,11 @@
 }
 else
 {
-    <div class="alert alert-info py-2"><i class="bi bi-info-circle"></i> No requirements defined for this client.</div>
+    <div class="text-center py-4">
+        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-info-circle text-muted" style="font-size: 2rem;"></i>
+        </div>
+        <h6 class="text-muted fw-bold mb-2">No Requirements Defined</h6>
+        <p class="text-muted mb-0">No requirements have been defined for this client yet.</p>
+    </div>
 }
